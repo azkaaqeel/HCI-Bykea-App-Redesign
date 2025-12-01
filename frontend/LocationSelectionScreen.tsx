@@ -1,5 +1,6 @@
 import { ArrowLeft, MapPin, Home, Briefcase, Plus, Search } from './ui/icons';
 import { useState } from 'react';
+import type { LatLngTuple } from 'leaflet';
 import { useTranslation } from './i18n';
 import { MapView } from './MapView';
 
@@ -43,7 +44,7 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<'recent' | 'map' | 'area'>('area');
   const [searchQuery, setSearchQuery] = useState('');
-  const [mapSelection, setMapSelection] = useState<[number, number] | null>(null);
+  const [mapSelection, setMapSelection] = useState<LatLngTuple | null>(null);
 
   const areaList = areas(t);
   const filteredAreas = areaList.filter(area => {
