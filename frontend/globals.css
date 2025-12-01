@@ -193,3 +193,230 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Colorblind Accessibility Mode */
+html.colorblind-mode {
+  /* Enhanced contrast for colorblind users */
+  --color-success: #2563eb; /* Blue instead of green */
+  --color-success-light: #dbeafe;
+  --color-warning: #dc2626; /* Red for warnings */
+  --color-warning-light: #fee2e2;
+  --color-info: #7c3aed; /* Purple for info */
+  --color-info-light: #ede9fe;
+  --color-error: #dc2626;
+  --color-error-light: #fee2e2;
+}
+
+/* Override green colors with blue in colorblind mode - HIGH SPECIFICITY */
+html.colorblind-mode .bg-green-200,
+html.colorblind-mode .bg-green-50,
+html.colorblind-mode .bg-green-100,
+html.colorblind-mode .bg-green-500,
+html.colorblind-mode button.bg-green-200,
+html.colorblind-mode [class*="bg-green"] {
+  background-color: #2563eb !important;
+}
+
+html.colorblind-mode .text-green-600,
+html.colorblind-mode .text-green-700,
+html.colorblind-mode .text-green-900 {
+  color: #1e40af !important;
+}
+
+html.colorblind-mode .border-green-200,
+html.colorblind-mode .border-green-500 {
+  border-color: #2563eb !important;
+}
+
+/* Target Tailwind arbitrary values - Tailwind escapes brackets */
+html.colorblind-mode [class*="bg-\\[\\#00D47C\\]"],
+html.colorblind-mode [class*="bg-\\[\\#00d47c\\]"],
+html.colorblind-mode [class*="00D47C"],
+html.colorblind-mode [class*="00d47c"] {
+  background-color: #2563eb !important;
+}
+
+html.colorblind-mode [class*="text-\\[\\#00D47C\\]"],
+html.colorblind-mode [class*="text-\\[\\#00d47c\\]"] {
+  color: #1e40af !important;
+}
+
+/* More aggressive - target any element with green-like colors */
+html.colorblind-mode button[class*="green"],
+html.colorblind-mode [class*="green-200"],
+html.colorblind-mode [class*="green-50"],
+html.colorblind-mode [class*="green-100"] {
+  background-color: #2563eb !important;
+}
+
+/* Also target inline styles */
+html.colorblind-mode [style*="rgb(0, 212, 124)"],
+html.colorblind-mode [style*="#00D47C"],
+html.colorblind-mode [style*="#00d47c"] {
+  background-color: #2563eb !important;
+}
+
+/* Add patterns to badges and status indicators */
+html.colorblind-mode [class*="badge"],
+html.colorblind-mode [class*="status"] {
+  position: relative;
+}
+
+html.colorblind-mode .bg-red-100,
+html.colorblind-mode .bg-red-500 {
+  background-color: var(--color-warning) !important;
+}
+
+html.colorblind-mode .bg-red-100::after,
+html.colorblind-mode .bg-red-500::after {
+  content: '⚠';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: white;
+}
+
+html.colorblind-mode .bg-blue-100,
+html.colorblind-mode .bg-blue-500 {
+  background-color: var(--color-info) !important;
+}
+
+html.colorblind-mode .bg-blue-100::after,
+html.colorblind-mode .bg-blue-500::after {
+  content: 'ℹ';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: white;
+}
+
+html.colorblind-mode .bg-purple-100,
+html.colorblind-mode .bg-purple-500 {
+  background-color: var(--color-info) !important;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.1) 10px,
+    rgba(255, 255, 255, 0.1) 20px
+  );
+}
+
+html.colorblind-mode .bg-yellow-100,
+html.colorblind-mode .bg-yellow-500 {
+  background-color: #f59e0b !important;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 8px,
+    rgba(0, 0, 0, 0.1) 8px,
+    rgba(0, 0, 0, 0.1) 16px
+  );
+}
+
+html.colorblind-mode .bg-orange-100,
+html.colorblind-mode .bg-orange-500 {
+  background-color: #ea580c !important;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 8px,
+    rgba(255, 255, 255, 0.2) 8px,
+    rgba(255, 255, 255, 0.2) 16px
+  );
+}
+
+/* High Contrast Mode - focused but not messy */
+html.high-contrast-mode {
+  /* Simple, very clear palette */
+  --background: #ffffff;
+  --foreground: #000000;
+  --border: #000000;
+  --color-success: #0000ff;
+  --color-warning: #ff0000;
+  --color-info: #000080;
+}
+
+/* Make overall text darker and slightly bolder */
+html.high-contrast-mode body {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+html.high-contrast-mode .text-gray-500,
+html.high-contrast-mode .text-gray-600,
+html.high-contrast-mode .text-gray-700,
+html.high-contrast-mode .text-gray-800,
+html.high-contrast-mode .text-gray-900 {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+/* Give key surfaces a clear outline without changing layout everywhere */
+html.high-contrast-mode .bg-gray-50,
+html.high-contrast-mode .bg-gray-100,
+html.high-contrast-mode .bg-white,
+html.high-contrast-mode .rounded-xl,
+html.high-contrast-mode .rounded-2xl,
+html.high-contrast-mode .rounded-3xl {
+  box-shadow: inset 0 0 0 2px #000000 !important;
+}
+
+/* Strong focus ring on interactive elements */
+html.high-contrast-mode button,
+html.high-contrast-mode [role="button"],
+html.high-contrast-mode a {
+  outline: 2px solid #000000 !important;
+  outline-offset: 2px !important;
+}
+
+/* Primary green actions become deep blue with white text */
+html.high-contrast-mode .bg-green-200,
+html.high-contrast-mode .bg-green-50,
+html.high-contrast-mode .bg-green-100,
+html.high-contrast-mode [class*="bg-green"],
+html.high-contrast-mode [class*="bg-\\[\\#00D47C\\]"],
+html.high-contrast-mode [class*="00D47C"],
+html.high-contrast-mode button[class*="green"] {
+  background-color: #0000ff !important;
+  color: #ffffff !important;
+}
+
+/* Inputs remain simple but clearly bounded */
+html.high-contrast-mode input,
+html.high-contrast-mode textarea {
+  border: 2px solid #000000 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Add text labels to color-only indicators */
+html.colorblind-mode .status-indicator::before {
+  content: attr(data-label);
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* Map markers with shapes */
+html.colorblind-mode .map-marker-pickup::before {
+  content: '▲';
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  font-size: 12px;
+  color: #0000ff;
+}
+
+html.colorblind-mode .map-marker-dropoff::before {
+  content: '●';
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  font-size: 12px;
+  color: #7c3aed;
+}

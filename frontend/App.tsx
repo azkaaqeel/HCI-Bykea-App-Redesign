@@ -22,6 +22,9 @@ import { HelpSupportScreen } from './HelpSupportScreen';
 import { ShopCartItem } from './types';
 import { useTranslation } from './i18n';
 import { LanguageSelectionModal } from './LanguageSelectionModal';
+import { SignInScreen } from './SignInScreen';
+import { VerifyOtpScreen } from './VerifyOtpScreen';
+import { UserMenuDrawer } from './UserMenuDrawer';
 
 type ScreenType =
   | 'home'
@@ -51,8 +54,8 @@ export default function App() {
     return hasSeenLanguagePrompt !== 'true';
   });
   const [locationType, setLocationType] = useState<'pickup' | 'dropoff'>('pickup');
-  const [pickupLocation, setPickupLocation] = useState('Kamla Nehru Road, Gulshan');
-  const [dropoffLocation, setDropoffLocation] = useState('Millennium Mall');
+  const [pickupLocation, setPickupLocation] = useState('');
+  const [dropoffLocation, setDropoffLocation] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState('bike');
   const [selectedPayment, setSelectedPayment] = useState('cash');
   const [selectedDriverId, setSelectedDriverId] = useState('');
@@ -70,10 +73,27 @@ export default function App() {
   const [deliveryLocationType, setDeliveryLocationType] = useState<'pickup' | 'delivery'>('pickup');
   const [parcelDetails, setParcelDetails] = useState<ParcelDetails | null>(null);
   const [trackingId, setTrackingId] = useState('');
+  const [authStep, setAuthStep] = useState<'sign-in' | 'verify' | 'done'>('sign-in');
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const navigateTo = (screen: ScreenType) => {
     setScreenHistory((prev) => [...prev, screen]);
   };
+
+  // Keep default pickup/dropoff in the active language until user picks something
+  useEffect(() => {
+    const defaultPickupEn = 'Surjani Town';
+    const defaultDropoffEn = 'Millennium Mall';
+    const defaultPickupUr = 'سرجانی ٹاؤن';
+    const defaultDropoffUr = 'ملینیم مال';
+
+    if (!pickupLocation || pickupLocation === defaultPickupEn || pickupLocation === defaultPickupUr) {
+      setPickupLocation(language === 'en' ? defaultPickupEn : defaultPickupUr);
+    }
+    if (!dropoffLocation || dropoffLocation === defaultDropoffEn || dropoffLocation === defaultDropoffUr) {
+      setDropoffLocation(language === 'en' ? defaultDropoffEn : defaultDropoffUr);
+    }
+  }, [language]);
 
   const goBack = () => {
     setScreenHistory((prev) => {
@@ -107,7 +127,7 @@ export default function App() {
   };
 
   const handleOpenHelpSupport = () => {
-    navigateTo('help-support');
+    setIsUserMenuOpen(true);
   };
 
   const handleConfirmBooking = (vehicleType: string, paymentMethod: string) => {
@@ -228,6 +248,20 @@ export default function App() {
   );
   const shopDeliveryFee = 50;
 
+  // Auth flow screens
+  if (authStep === 'sign-in') {
+    return <SignInScreen onContinue={() => setAuthStep('verify')} />;
+  }
+
+  if (authStep === 'verify') {
+    return (
+      <VerifyOtpScreen
+        onBack={() => setAuthStep('sign-in')}
+        onVerified={() => setAuthStep('done')}
+      />
+    );
+  }
+
   // Delivery flow screens
   if (currentScreen === 'order-placed') {
     return (
@@ -333,10 +367,9 @@ export default function App() {
       <LocationConfirmationScreen
         onBack={goBack}
         onConfirm={handleConfirmLocation}
-        address="House 23, Street 5"
-        area="F-7/2, Islamabad"
-        landmark="Jinnah Super Market"
-        landmarkDistance="50 meters away"
+        address={pickupLocation}
+        area={language === 'en' ? 'Karachi' : 'کراچی'}
+        landmark={dropoffLocation}
       />
     );
   }
@@ -428,30 +461,28 @@ export default function App() {
         <LanguageSelectionModal onClose={handleCloseLanguageModal} />
       )}
       
-      {/* Language Toggle Button - More visible */}
+      {/* Language Toggle Button - without extra English in Urdu mode */}
       <button
         onClick={() => setShowLanguageModal(true)}
-        className="absolute top-12 right-4 z-50 rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-lg hover:shadow-xl transition-all border-2 border-gray-200"
+        className="absolute top-6 right-4 z-50 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 shadow-sm hover:bg-[#00D47C] hover:text-white hover:border-[#00D47C] transition-colors"
       >
         {language === 'en' ? 'اردو' : 'EN'}
       </button>
-      
-      {/* Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-2 pb-1">
-        <div className="text-black">9:55</div>
-        <div className="text-black">24%</div>
-      </div>
 
-      {/* Menu Button */}
+      {/* Menu Button - stacked below language toggle on the right */}
       <button 
         onClick={handleOpenHelpSupport}
-        className="absolute top-12 left-4 z-40 bg-white rounded-lg p-3 shadow-lg"
+        className="absolute top-20 right-4 z-40 bg-white/90 rounded-full w-10 h-10 flex items-center justify-center border border-gray-200 shadow-sm hover:bg-[#00D47C] hover:text-white hover:border-[#00D47C] transition-colors"
+        aria-label={t('help.title', 'Help & Support')}
       >
-        <Menu className="w-6 h-6 text-gray-700" />
+        <Menu className="w-5 h-5" />
       </button>
 
-      {/* Map */}
-      <MapView />
+      {/* Map - home view, just show user + nearby vehicles */}
+      <MapView showRoute={false} />
+
+      {/* User Menu Drawer */}
+      <UserMenuDrawer open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen} />
 
       {/* Promo Banner and Location Card Container */}
       <div className="absolute bottom-40 left-0 right-0 z-30 px-3 flex flex-col gap-4 pb-4">

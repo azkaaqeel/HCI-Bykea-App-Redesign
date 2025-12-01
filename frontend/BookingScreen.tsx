@@ -1,6 +1,5 @@
 import { ArrowLeft, MapPin, ChevronDown, ChevronUp, Info, Check, CreditCard, Wallet, Banknote } from './ui/icons';
 import { useState } from 'react';
-import { MapView } from './MapView';
 import {
   Sheet,
   SheetContent,
@@ -35,19 +34,19 @@ interface BookingScreenProps {
 const vehicles: VehicleOption[] = [
   {
     id: 'bike',
-    name: 'Bike',
+    name: 'booking.vehicle.bike',
     icon: '🚲',
     breakdown: { base: 70, distance: 110, time: 20 },
   },
   {
     id: 'rickshaw',
-    name: 'Rickshaw',
+    name: 'booking.vehicle.rickshaw',
     icon: '🛺',
     breakdown: { base: 90, distance: 180, time: 45 },
   },
   {
     id: 'car',
-    name: 'Car',
+    name: 'booking.vehicle.car',
     icon: '🚗',
     breakdown: { base: 120, distance: 260, time: 80 },
     discountRate: 0.2,
@@ -55,7 +54,7 @@ const vehicles: VehicleOption[] = [
   },
   {
     id: 'ac-car',
-    name: 'AC Car',
+    name: 'booking.vehicle.acCar',
     icon: '🚙',
     breakdown: { base: 100, distance: 260, time: 60 },
     discountRate: 0.3,
@@ -77,9 +76,9 @@ function calculateFare(vehicle: VehicleOption) {
 }
 
 const paymentMethods = [
-  { id: 'cash', name: 'Cash', icon: Banknote, description: 'Pay with cash after ride' },
-  { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, description: 'Pay with saved card' },
-  { id: 'wallet', name: 'Bykea Wallet', icon: Wallet, description: 'Pay from wallet balance' },
+  { id: 'cash', nameKey: 'booking.payment.cash', icon: Banknote, descriptionKey: 'booking.payment.cashDesc' },
+  { id: 'card', nameKey: 'booking.payment.card', icon: CreditCard, descriptionKey: 'booking.payment.cardDesc' },
+  { id: 'wallet', nameKey: 'booking.payment.wallet', icon: Wallet, descriptionKey: 'booking.payment.walletDesc' },
 ];
 
 export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocation }: BookingScreenProps) {
@@ -100,55 +99,41 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
   };
 
   return (
-    <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1 bg-white z-50">
-        <div className="text-black flex items-center gap-1">
-          9:56 <span className="text-xs">✈️</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-black">56</span>
-        </div>
-      </div>
+    <div className="relative h-screen w-full max-w-md mx-auto bg-[#f5f7fb] overflow-hidden flex flex-col">
+      {/* Soft gradient backdrop */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#dff7ec] via-white to-transparent" />
 
-      {/* Map Background */}
-      <div className="absolute inset-0 top-12">
-        <MapView />
-      </div>
-
-      {/* Route Card */}
-      <div className="relative z-40 mx-4 mt-2 bg-white rounded-2xl shadow-lg p-4">
+      {/* Header + Route Summary */}
+      <div className="relative z-10 px-4 pt-6">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          <button onClick={onBack} className="p-3 rounded-full bg-white shadow hover:bg-gray-50">
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
-          
-          <div className="flex-1">
-            <div className="flex items-start gap-3 mb-2">
-              <MapPin className="w-5 h-5 text-[#00D47C] mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-black line-clamp-1">{pickupLocation}</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-black line-clamp-1">{dropoffLocation}</p>
+          <div>
+            <p className="text-xs text-gray-500">{t('booking.fasterPickup', 'faster pickup')}</p>
+            <h1 className="text-lg font-semibold text-gray-900">{t('booking.payment', 'Booking')}</h1>
+          </div>
+        </div>
+
+        <div className="mt-4 bg-white rounded-3xl shadow-sm border border-green-100 p-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-[#00D47C] mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs text-gray-500">{t('location.from')}</p>
+              <p className="text-sm text-gray-900">{pickupLocation}</p>
             </div>
           </div>
-
-          <button className="p-2 hover:bg-gray-100 rounded-lg">
-            <svg className="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Trip Info */}
-        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-          <div className="bg-gray-100 rounded-full px-3 py-1.5 flex items-center gap-2">
-            <svg className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="12" cy="12" r="10" strokeWidth={2} />
-              <path d="M12 6v6l4 2" strokeWidth={2} strokeLinecap="round" />
-            </svg>
-            <span className="text-sm text-black">5 min</span>
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs text-gray-500">{t('location.to')}</p>
+              <p className="text-sm text-gray-900">{dropoffLocation}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 pt-2 border-t border-dashed border-gray-200 text-sm text-gray-600">
+            <span>⏱️ 5 min</span>
+            <span>•</span>
+            <span>📏 5.2 km</span>
           </div>
         </div>
       </div>
@@ -229,7 +214,7 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
           <div className="flex items-center gap-2">
             {currentPaymentMethod && <currentPaymentMethod.icon className="w-5 h-5 text-gray-600" />}
             <span className="text-black">
-              {t('booking.payment', 'Payment')}: {currentPaymentMethod?.name}
+              {t('booking.payment', 'Payment')}: {currentPaymentMethod ? t(currentPaymentMethod.nameKey) : ''}
             </span>
           </div>
           <ChevronDown className="w-5 h-5 text-gray-400" />
@@ -266,7 +251,7 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
                 )}
                 <div className="flex flex-col items-center gap-2">
                   <span className="text-3xl">{vehicle.icon}</span>
-                  <span className="text-xs text-gray-600">{vehicle.name}</span>
+                  <span className="text-xs text-gray-600">{t(vehicle.name)}</span>
                   {fare.discountAmount > 0 && (
                     <span className="text-xs text-gray-400 line-through">
                       Rs. {fare.subtotal.toFixed(0)}
@@ -320,9 +305,9 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
       <Sheet open={isPaymentSheetOpen} onOpenChange={setIsPaymentSheetOpen}>
         <SheetContent side="bottom" className="max-w-md mx-auto rounded-t-3xl">
           <SheetHeader>
-            <SheetTitle>Select Payment Method</SheetTitle>
+            <SheetTitle>{t('booking.paymentSheet.title', 'Select Payment Method')}</SheetTitle>
             <SheetDescription>
-              Choose how you want to pay for your ride
+              {t('booking.paymentSheet.subtitle', 'Choose how you want to pay for your ride')}
             </SheetDescription>
           </SheetHeader>
           <div className="mt-6 space-y-3">
@@ -349,8 +334,8 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
                     }`} />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-black">{method.name}</p>
-                    <p className="text-sm text-gray-500">{method.description}</p>
+                    <p className="text-black">{t(method.nameKey)}</p>
+                    <p className="text-sm text-gray-500">{t(method.descriptionKey)}</p>
                   </div>
                   {selectedPayment === method.id && (
                     <Check className="w-6 h-6 text-[#00D47C]" />

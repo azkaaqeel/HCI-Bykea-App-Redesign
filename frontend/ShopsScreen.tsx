@@ -1,6 +1,7 @@
-import { Menu, MapPin, Search, Heart, Clock } from './ui/icons';
+import { ArrowLeft, MapPin, Search, Heart, Clock } from './ui/icons';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useTranslation } from './i18n';
+import { useAccessibility } from './accessibility';
 
 interface ShopInfo {
   id: number;
@@ -19,6 +20,7 @@ interface ShopsScreenProps {
 
 export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
   const { t } = useTranslation();
+  const { isColorblindMode } = useAccessibility();
   const categories = [
     { name: t('shops.categories.groceries'), key: 'groceries', color: 'bg-green-100', icon: '🛒' },
     { name: t('shops.categories.pharmacy'), key: 'pharmacy', color: 'bg-red-100', icon: '💊' },
@@ -89,17 +91,19 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
-      {/* Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-2 pb-1 bg-white">
-        <div className="text-black">9:55</div>
-        <div className="text-black">24%</div>
-      </div>
-
-      {/* Top Header */}
-      <div className="absolute top-8 left-0 right-0 z-40 flex items-center justify-between px-4 bg-white pb-2">
-        <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1">
-          <MapPin className="w-4 h-4 text-gray-600" />
-          <span className="text-xs text-gray-800">Jamia Darul Khair</span>
+      {/* Top Header with Back */}
+      <div className="absolute top-4 left-0 right-0 z-40 flex items-center justify-between px-4 bg-white pb-2">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="bg-gray-100 rounded-full p-2 shadow-sm hover:bg-gray-200 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 text-gray-700" />
+          </button>
+          <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1">
+            <MapPin className="w-4 h-4 text-gray-600" />
+            <span className="text-xs text-gray-800">جامعہ دارالخیر</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button className="bg-gray-100 rounded-full p-2">
@@ -107,18 +111,10 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
           </button>
           <button className="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
             <Clock className="w-3 h-3 text-gray-600" />
-            <span className="text-xs text-gray-600">Now</span>
+            <span className="text-xs text-gray-600">ابھی</span>
           </button>
         </div>
       </div>
-
-      {/* Menu Button */}
-      <button 
-        onClick={onBack}
-        className="absolute top-20 left-4 z-40 bg-white rounded-lg p-3 shadow-lg"
-      >
-        <Menu className="w-6 h-6 text-gray-700" />
-      </button>
 
       {/* Main Content - Scrollable */}
       <div className="h-full overflow-y-auto pt-32 pb-40">
@@ -144,15 +140,29 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
           {/* Categories Section */}
           <div className="mb-6">
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {categories.map((category, index) => (
-                <button 
-                  key={index}
-                  className={`flex-shrink-0 flex flex-col items-center gap-2 ${category.color} rounded-2xl px-6 py-4 min-w-[100px]`}
-                >
-                  <span className="text-2xl">{category.icon}</span>
-                  <span className="text-xs text-gray-700">{category.name}</span>
-                </button>
-              ))}
+              {categories.map((category, index) => {
+                const getPatternStyle = () => {
+                  if (!isColorblindMode) return {};
+                  if (category.color.includes('green')) return {};
+                  if (category.color.includes('yellow')) {
+                    return { backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px)' };
+                  }
+                  if (category.color.includes('orange')) {
+                    return { backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(255,255,255,0.2) 4px, rgba(255,255,255,0.2) 8px)' };
+                  }
+                  return {};
+                };
+                return (
+                  <button 
+                    key={index}
+                    className={`flex-shrink-0 flex flex-col items-center gap-2 ${category.color} rounded-2xl px-6 py-4 min-w-[100px] relative`}
+                    style={getPatternStyle()}
+                  >
+                    <span className="text-2xl">{category.icon}</span>
+                    <span className="text-xs text-gray-700">{category.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -177,7 +187,16 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
                       <span className="text-xs text-gray-600">{shop.deliveryTime}</span>
                     </div>
                   </div>
-                  <div className={`${shop.badgeColor} text-white rounded-full px-2 py-1 text-xs inline-block`}>
+                  <div className={`${shop.badgeColor} text-white rounded-full px-2 py-1 text-xs inline-block relative`}>
+                    {isColorblindMode && shop.badgeColor.includes('green') && (
+                      <span className="mr-1">✓</span>
+                    )}
+                    {isColorblindMode && shop.badgeColor.includes('orange') && (
+                      <span className="mr-1">%</span>
+                    )}
+                    {isColorblindMode && shop.badgeColor.includes('blue') && (
+                      <span className="mr-1">★</span>
+                    )}
                     {shop.badge}
                   </div>
                 </button>
@@ -187,10 +206,10 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
 
           {/* Promotional Banner */}
           <div className="mb-6 bg-gradient-to-r from-[#00D47C] to-[#00b869] rounded-2xl p-6 text-white shadow-lg">
-            <h2 className="text-white mb-2">30% Off on First Order! 🎉</h2>
-            <p className="text-sm text-white/90 mb-4">Use code: FIRSTORDER at checkout</p>
+            <h2 className="text-white mb-2">پہلے آرڈر پر 30٪ رعایت! 🎉</h2>
+            <p className="text-sm text-white/90 mb-4">چیک آؤٹ پر FIRSTORDER کوڈ استعمال کریں</p>
             <button className="bg-white text-[#00D47C] px-6 py-2 rounded-full">
-              Shop Now
+              ابھی خریدیں
             </button>
           </div>
 

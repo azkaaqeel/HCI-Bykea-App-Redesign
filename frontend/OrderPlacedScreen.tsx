@@ -20,12 +20,6 @@ export function OrderPlacedScreen({
 }: OrderPlacedScreenProps) {
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1 bg-white z-50">
-        <div className="text-black">9:41</div>
-        <div className="text-black">75%</div>
-      </div>
-
       {/* Map Background */}
       <div className="h-64 relative">
         <MapView />

@@ -53,12 +53,6 @@ export function ParcelDetailsScreen({
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1 bg-white z-50">
-        <div className="text-black">9:41</div>
-        <div className="text-black">75%</div>
-      </div>
-
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-white z-50 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">

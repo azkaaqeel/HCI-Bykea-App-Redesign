@@ -1,5 +1,6 @@
 import { ArrowLeft, Star, Check, X, TrendingDown } from './ui/icons';
 import { useState, useEffect } from 'react';
+import { useAccessibility } from './accessibility';
 
 interface DriverOffersScreenProps {
   onBack: () => void;
@@ -85,6 +86,7 @@ export function DriverOffersScreen({
   pickupLocation,
   dropoffLocation,
 }: DriverOffersScreenProps) {
+  const { isColorblindMode } = useAccessibility();
   const [selectedFilter, setSelectedFilter] = useState<'price' | 'rating' | 'pickup'>('price');
   const [expiryTimer, setExpiryTimer] = useState(225); // 3:45 in seconds
   const [rejectedOffers, setRejectedOffers] = useState<string[]>([]);
@@ -116,16 +118,6 @@ export function DriverOffersScreen({
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-gray-50 overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1 bg-white z-50">
-        <div className="text-black flex items-center gap-1">
-          9:56 <span className="text-xs">✈️</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-black">56</span>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-3">
@@ -262,7 +254,10 @@ export function DriverOffersScreen({
 
             {/* Price and Details */}
             <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+              <div className="bg-green-50 rounded-xl p-3 border border-green-200 relative">
+                {isColorblindMode && (
+                  <span className="absolute top-2 right-2 text-blue-600 font-bold text-xs">✓</span>
+                )}
                 <p className="text-xs text-green-700 mb-1">💰 Price</p>
                 <p className="text-xl text-green-900">Rs. {offer.price}</p>
                 {offer.priceLabel && (
@@ -273,12 +268,18 @@ export function DriverOffersScreen({
                 )}
               </div>
               <div className="space-y-2">
-                <div className="bg-blue-50 rounded-xl p-2 border border-blue-200">
+                <div className="bg-blue-50 rounded-xl p-2 border border-blue-200 relative">
+                  {isColorblindMode && (
+                    <span className="absolute top-1 right-1 text-purple-600 font-bold text-xs">ℹ</span>
+                  )}
                   <p className="text-xs text-blue-900">
                     ⏱️ Arrives in: <span>{offer.arrivalTime} min</span>
                   </p>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-2 border border-purple-200">
+                <div className="bg-purple-50 rounded-xl p-2 border border-purple-200 relative" style={{ backgroundImage: isColorblindMode ? 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px)' : undefined }}>
+                  {isColorblindMode && (
+                    <span className="absolute top-1 right-1 text-purple-600 font-bold text-xs">📍</span>
+                  )}
                   <p className="text-xs text-purple-900">
                     📍 {offer.distance} away
                   </p>

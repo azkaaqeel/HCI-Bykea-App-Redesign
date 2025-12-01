@@ -82,12 +82,6 @@ export function ShopDetailScreen({
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
-      {/* Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-2 pb-1 bg-white">
-        <div className="text-black">9:55</div>
-        <div className="text-black">24%</div>
-      </div>
-
       {/* Header Section */}
       <div className="absolute top-8 left-0 right-0 z-40 bg-white pb-3 shadow-sm">
         <div className="flex items-center justify-between px-4 pt-2 pb-3">

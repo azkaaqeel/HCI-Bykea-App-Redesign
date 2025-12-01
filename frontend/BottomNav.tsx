@@ -1,6 +1,7 @@
 import { Car, Package, Store } from './ui/icons';
 import { useState } from 'react';
 import { useTranslation } from './i18n';
+import { useAccessibility } from './accessibility';
 
 interface BottomNavProps {
   activeTab?: string;
@@ -9,6 +10,7 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab: externalActiveTab, onTabChange }: BottomNavProps = {}) {
   const { t } = useTranslation();
+  const { isColorblindMode } = useAccessibility();
   const [internalActiveTab, setInternalActiveTab] = useState('ride');
   const activeTab = externalActiveTab || internalActiveTab;
   
@@ -37,7 +39,12 @@ export function BottomNav({ activeTab: externalActiveTab, onTabChange }: BottomN
             {t('nav.ride')}
           </span>
           {activeTab === 'ride' && (
-            <div className="w-12 h-1 bg-green-600 rounded-full absolute bottom-2"></div>
+            <>
+              <div className="w-12 h-1 bg-green-600 rounded-full absolute bottom-2"></div>
+              {isColorblindMode && (
+                <span className="absolute top-1 right-1 text-blue-600 font-bold text-xs">✓</span>
+              )}
+            </>
           )}
         </button>
 

@@ -34,8 +34,8 @@ export function LanguageSelectionModal({ onClose }: LanguageSelectionModalProps)
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center p-4 sm:p-6">
-      <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center px-4 pb-6 pt-10">
+      <div className="bg-white rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-[#00D47C] to-[#00be6f] px-4 py-3 sm:px-6 sm:py-4">
           <button

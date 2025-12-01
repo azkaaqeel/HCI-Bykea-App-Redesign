@@ -1,5 +1,6 @@
 import { ArrowUpDown } from './ui/icons';
 import { useTranslation } from './i18n';
+import { useAccessibility } from './accessibility';
 
 interface LocationCardProps {
   pickupLocation: string;
@@ -9,16 +10,27 @@ interface LocationCardProps {
 
 export function LocationCard({ pickupLocation, dropoffLocation, onOpenLocationSelection }: LocationCardProps) {
   const { t } = useTranslation();
+  const { isColorblindMode } = useAccessibility();
 
   return (
     <div className="bg-white rounded-3xl border-2 border-green-400 shadow-xl p-4">
       <div className="flex items-start gap-3">
         {/* Location dots */}
         <div className="flex flex-col items-center gap-1 pt-1">
-          <div className="w-3 h-3 rounded-full border-2 border-green-500"></div>
+          <div className="relative">
+            <div className="w-3 h-3 rounded-full border-2 border-green-500"></div>
+            {isColorblindMode && (
+              <span className="absolute -top-1 -right-1 text-blue-600 font-bold text-xs">▲</span>
+            )}
+          </div>
           <div className="w-0.5 h-3 bg-gray-300"></div>
           <div className="w-0.5 h-3 bg-gray-300"></div>
-          <div className="w-3 h-3 rounded-full border-2 border-purple-500"></div>
+          <div className="relative">
+            <div className="w-3 h-3 rounded-full border-2 border-purple-500"></div>
+            {isColorblindMode && (
+              <span className="absolute -top-1 -right-1 text-purple-600 font-bold text-xs">●</span>
+            )}
+          </div>
         </div>
 
         {/* Location details */}
@@ -35,17 +47,12 @@ export function LocationCard({ pickupLocation, dropoffLocation, onOpenLocationSe
           </button>
 
           {/* Dropoff location */}
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={() => onOpenLocationSelection('dropoff')}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {dropoffLocation || t('home.location.dropoffLabel', 'Enter Dropoff')}
-            </button>
-            <button className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-              {t('home.location.skip')}
-            </button>
-          </div>
+          <button 
+            onClick={() => onOpenLocationSelection('dropoff')}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {dropoffLocation || t('home.location.dropoffLabel', 'Enter Dropoff')}
+          </button>
         </div>
 
         {/* More options button */}

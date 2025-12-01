@@ -80,14 +80,6 @@ export function RideTrackingScreen({
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-2 pb-1 bg-gradient-to-b from-black/30 to-transparent">
-        <div className="text-white">9:58</div>
-        <div className="text-white flex items-center gap-1">
-          <span>48%</span>
-        </div>
-      </div>
-
       {/* Back Button */}
       <button
         onClick={onBack}

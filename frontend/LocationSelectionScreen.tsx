@@ -10,8 +10,8 @@ interface LocationSelectionScreenProps {
 }
 
 const savedAddresses = (t: (key: string) => string) => [
-  { icon: Home, label: t('location.home'), address: 'House 23, F-7/2, Islamabad' },
-  { icon: Briefcase, label: t('location.work'), address: 'Blue Area, G-9, Islamabad' },
+  { icon: Home, label: t('location.home'), address: 'ہاؤس 23، ایف-7/2، اسلام آباد' },
+  { icon: Briefcase, label: t('location.work'), address: 'بلو ایریا، G-9، اسلام آباد' },
 ];
 
 const recentLocations = (t: (key: string) => string) => [
@@ -43,6 +43,7 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<'recent' | 'map' | 'area'>('area');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mapSelection, setMapSelection] = useState<[number, number] | null>(null);
 
   const areaList = areas(t);
   const filteredAreas = areaList.filter(area => {
@@ -58,16 +59,8 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1">
-        <div className="text-black">9:55</div>
-        <div className="flex items-center gap-1">
-          <div className="text-black">56</div>
-        </div>
-      </div>
-
       {/* Header with Search */}
-      <div className="px-4 py-3">
+      <div className="px-4 pt-4 pb-3">
         <div className="flex items-center gap-3 mb-3">
           <button onClick={onBack} className="p-2 -ml-2">
             <ArrowLeft className="w-6 h-6 text-gray-600" />
@@ -183,7 +176,45 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
 
         {activeTab === 'map' && (
           <div className="h-full relative">
-            <MapView />
+            <MapView
+              selectionType={type}
+              onMapClick={(coords) => setMapSelection(coords)}
+            />
+
+            {/* Hover-style info about selected point */}
+            {mapSelection && (
+              <div className="absolute top-4 left-4 right-4 z-20 flex justify-center pointer-events-none">
+                <div className="inline-flex max-w-xs items-center justify-between gap-3 rounded-full bg-white/90 px-4 py-2 text-xs text-gray-700 shadow pointer-events-auto">
+                  <span className="font-semibold text-[#00D47C]">
+                    {type === 'pickup' ? t('home.location.pickupLabel') : t('home.location.dropoffLabel')}
+                  </span>
+                  <span className="truncate">
+                    {mapSelection[0].toFixed(4)}, {mapSelection[1].toFixed(4)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Confirm button to save selection and go back */}
+            <div className="absolute bottom-6 left-4 right-4 z-20">
+              <button
+                disabled={!mapSelection}
+                onClick={() => {
+                  if (!mapSelection) return;
+                  const label = `${t('location.currentLocation')} (${mapSelection[0].toFixed(4)}, ${mapSelection[1].toFixed(4)})`;
+                  onSelectLocation(label);
+                }}
+                className={`w-full rounded-full py-3 text-sm font-semibold shadow-lg transition-colors ${
+                  mapSelection
+                    ? 'bg-[#00D47C] text-white hover:bg-[#00bd6e]'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {mapSelection
+                  ? t('location.saveLocation', 'Save location')
+                  : t('delivery.searchPlaceholder')}
+              </button>
+            </div>
           </div>
         )}
 
@@ -193,7 +224,7 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
             <div className="space-y-1 pb-6">
               {/* Current Location as first option */}
               <button
-                onClick={() => onSelectLocation('Current Location')}
+                onClick={() => onSelectLocation(t('location.currentLocation'))}
                 className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors text-left"
               >
                 <div className="w-10 h-10 bg-[#00D47C] rounded-full flex items-center justify-center flex-shrink-0">
@@ -207,7 +238,7 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
                 return (
                   <button
                     key={index}
-                    onClick={() => onSelectLocation(area.en)}
+                    onClick={() => onSelectLocation(displayName)}
                     className="w-full text-left p-4 hover:bg-gray-50 rounded-xl transition-colors text-black"
                   >
                     {displayName}

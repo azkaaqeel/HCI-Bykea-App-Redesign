@@ -42,16 +42,6 @@ export function SearchingDriversScreen({
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-gradient-to-b from-white to-gray-50 overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1 bg-white z-50">
-        <div className="text-black flex items-center gap-1">
-          9:56 <span className="text-xs">✈️</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-black">56</span>
-        </div>
-      </div>
-
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-200">
         <div className="flex items-center gap-3">

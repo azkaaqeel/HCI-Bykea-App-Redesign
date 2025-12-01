@@ -1,6 +1,7 @@
 import { ArrowLeft, MapPin } from './ui/icons';
 import { MapView } from './MapView';
 import { useTranslation } from './i18n';
+import { useAccessibility } from './accessibility';
 
 interface DeliveryPickFromScreenProps {
   onBack: () => void;
@@ -20,16 +21,11 @@ export function DeliveryPickFromScreen({
   deliveryAddress,
 }: DeliveryPickFromScreenProps) {
   const { t } = useTranslation();
+  const { isColorblindMode } = useAccessibility();
   const bothAddressesEntered = pickupAddress && deliveryAddress;
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
-      {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 pt-2 pb-1 bg-white z-50">
-        <div className="text-black">9:41</div>
-        <div className="text-black">75%</div>
-      </div>
-
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-white z-50 border-b border-gray-100">
         <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">
@@ -48,7 +44,12 @@ export function DeliveryPickFromScreen({
         {/* Pick From Section */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-3 h-3 rounded-full bg-[#00D47C]" />
+            <div className="relative flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#00D47C]" />
+              {isColorblindMode && (
+                <span className="text-xs font-bold text-blue-600">▲ PICKUP</span>
+              )}
+            </div>
             <span className="text-sm text-gray-600">{t('delivery.pickFrom')}</span>
           </div>
           
@@ -70,7 +71,12 @@ export function DeliveryPickFromScreen({
         {/* Get Fare Section */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-3 h-3 rounded-full bg-purple-500" />
+            <div className="relative flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-purple-500" />
+              {isColorblindMode && (
+                <span className="text-xs font-bold text-purple-600">● DROP</span>
+              )}
+            </div>
             <span className="text-sm text-gray-600">{t('delivery.deliverTo')}</span>
           </div>
           
