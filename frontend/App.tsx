@@ -25,6 +25,10 @@ import { LanguageSelectionModal } from './LanguageSelectionModal';
 import { SignInScreen } from './SignInScreen';
 import { VerifyOtpScreen } from './VerifyOtpScreen';
 import { UserMenuDrawer } from './UserMenuDrawer';
+import { LiveChatScreen } from './LiveChatScreen';
+import { CallSupportScreen } from './CallSupportScreen';
+
+
 
 type ScreenType =
   | 'home'
@@ -32,6 +36,7 @@ type ScreenType =
   | 'location-confirmation'
   | 'booking'
   | 'help-support'
+  | 'live-chat'
   | 'searching-drivers'
   | 'driver-offers'
   | 'ride-tracking'
@@ -42,7 +47,8 @@ type ScreenType =
   | 'shops'
   | 'shop-detail'
   | 'shop-cart'
-  | 'shop-checkout';
+  | 'shop-checkout'
+  |'call-Support';
 
 export default function App() {
   const { language, toggleLanguage, t } = useTranslation();
@@ -248,19 +254,26 @@ export default function App() {
   );
   const shopDeliveryFee = 50;
 
-  // Auth flow screens
-  if (authStep === 'sign-in') {
-    return <SignInScreen onContinue={() => setAuthStep('verify')} />;
-  }
+  // ✅ Auth flow screens (NOW WRAPPED IN MOBILE FRAME)
+if (authStep === 'sign-in') {
+  return (
+    <div className="relative h-screen w-full max-w-md mx-auto bg-gray-100 overflow-hidden">
+      <SignInScreen onContinue={() => setAuthStep('verify')} />
+    </div>
+  );
+}
 
-  if (authStep === 'verify') {
-    return (
+if (authStep === 'verify') {
+  return (
+    <div className="min-h-screen w-full max-w-md mx-auto bg-gray-100 overflow-y-auto">
       <VerifyOtpScreen
         onBack={() => setAuthStep('sign-in')}
         onVerified={() => setAuthStep('done')}
       />
-    );
-  }
+    </div>
+  );
+}
+
 
   // Delivery flow screens
   if (currentScreen === 'order-placed') {
@@ -385,10 +398,23 @@ export default function App() {
   }
 
   if (currentScreen === 'help-support') {
-    return (
-      <HelpSupportScreen onBack={goBack} />
-    );
-  }
+  return (
+    <HelpSupportScreen
+      onBack={goBack}
+      onStartLiveChat={() => navigateTo('live-chat')} 
+       onStartCall={() => navigateTo('call-Support')}  // ✅ THIS LINE ADDED
+    />
+  );
+}
+if (currentScreen === 'live-chat') {
+  return <LiveChatScreen onBack={goBack} />;
+}
+if (currentScreen === 'call-Support') {
+  return <CallSupportScreen onBack={goBack} />;
+}
+
+
+
 
   if (currentScreen === 'shops') {
     return (
@@ -482,7 +508,16 @@ export default function App() {
       <MapView showRoute={false} />
 
       {/* User Menu Drawer */}
-      <UserMenuDrawer open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen} />
+      <UserMenuDrawer
+  open={isUserMenuOpen}
+  onOpenChange={setIsUserMenuOpen}
+  onHelpSupport={() => {
+    // close the side menu
+    setIsUserMenuOpen(false);
+    // navigate to the Help & Support screen
+    navigateTo('help-support');
+  }}
+/>
 
       {/* Promo Banner and Location Card Container */}
       <div className="absolute bottom-40 left-0 right-0 z-30 px-3 flex flex-col gap-4 pb-4">

@@ -5,6 +5,8 @@ import { useAccessibility } from './accessibility';
 
 interface HelpSupportScreenProps {
   onBack: () => void;
+  onStartLiveChat?: () => void;
+  onStartCall?: () => void;
 }
 
 const commonIssuesKeys = [
@@ -15,7 +17,11 @@ const commonIssuesKeys = [
   'help.issue.app',
 ];
 
-export function HelpSupportScreen({ onBack }: HelpSupportScreenProps) {
+export function HelpSupportScreen({
+  onBack,
+  onStartLiveChat,
+  onStartCall,
+}: HelpSupportScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const { language, setLanguage, t } = useTranslation();
   const { mode, setMode, isColorblindMode, isHighContrast } = useAccessibility();
@@ -53,14 +59,20 @@ export function HelpSupportScreen({ onBack }: HelpSupportScreenProps) {
         </div>
 
         {/* Emergency Support Section */}
+              {/* Emergency Support Section */}
         <div className="px-4 py-3">
           <div className="bg-gradient-to-br from-[#00D47C] to-[#00be6f] rounded-2xl p-5 shadow-lg">
-            <button className="w-full">
+            <button
+              className="w-full"
+              onClick={() => onStartCall?.()}  // navigate to Call AIR screen
+            >
               <div className="flex items-center justify-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <Phone className="w-5 h-5 text-white" />
                 </div>
-              <span className="text-white">{t('help.callSupport', 'CALL SUPPORT (24/7)')}</span>
+                <span className="text-white">
+                  {t('help.callSupport', 'CALL SUPPORT (24/7)')}
+                </span>
               </div>
               <p className="text-white/90 text-sm text-center">
                 {t('help.callWait', 'Average wait: 30 seconds')}
@@ -69,9 +81,13 @@ export function HelpSupportScreen({ onBack }: HelpSupportScreenProps) {
           </div>
         </div>
 
+
         {/* Live Chat Support */}
         <div className="px-4 pb-3">
-          <button className="w-full bg-white border-2 border-[#00D47C] rounded-2xl p-5 shadow-sm hover:bg-gray-50 transition-colors">
+          <button
+  className="w-full bg-white border-2 border-[#00D47C] rounded-2xl p-5 shadow-sm hover:bg-gray-50 transition-colors"
+  onClick={() => onStartLiveChat?.()}   // ✅ tell parent to open chat screen
+>
             <div className="flex items-center justify-center gap-3 mb-2">
               <div className="w-10 h-10 bg-[#00D47C]/10 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-[#00D47C]" />

@@ -6,9 +6,10 @@ import { Phone, Globe, Info, Filter, Clock, Wallet, Bell } from './ui/icons';
 interface UserMenuDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onHelpSupport: () => void;
 }
 
-export function UserMenuDrawer({ open, onOpenChange }: UserMenuDrawerProps) {
+export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
   const { mode, setMode } = useAccessibility();
 
@@ -56,7 +57,11 @@ export function UserMenuDrawer({ open, onOpenChange }: UserMenuDrawerProps) {
             </div>
             <span className="text-xs text-gray-500 capitalize">{mode}</span>
           </button>
-          <MenuItem icon={Info} label="Help & Support" />
+          <MenuItem
+  icon={Info}
+  label="Help & Support"
+  onClick={onHelpSupport}
+/>
         </div>
 
         <div className="mt-auto px-6 pb-6 pt-2">
@@ -72,11 +77,15 @@ export function UserMenuDrawer({ open, onOpenChange }: UserMenuDrawerProps) {
 interface MenuItemProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   label: string;
+  onClick?: () => void;               // 🔥 new
 }
 
-function MenuItem({ icon: Icon, label }: MenuItemProps) {
+function MenuItem({ icon: Icon, label, onClick }: MenuItemProps) {
   return (
-    <button className="w-full flex items-center gap-3 py-3 text-gray-800">
+    <button
+      className="w-full flex items-center gap-3 py-3 text-gray-800"
+      onClick={onClick}
+    >
       <Icon className="w-5 h-5 text-[#00A859]" />
       <span>{label}</span>
     </button>
