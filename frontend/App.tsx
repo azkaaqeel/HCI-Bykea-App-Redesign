@@ -235,6 +235,13 @@ export default function App() {
     setActiveBottomTab('ride');
     navigateTo('home');
   };
+  const handleUpdateDropoffLocation = (location: string) => {
+    // update all the “source of truth” states that use dropoff
+    setDropoffLocation(location);
+    setCurrentDropoffLocation(location);
+    setDeliveryDropoffAddress(location); // optional, remove if you don’t want to touch delivery flow
+  };
+
 
   const handleAddItemToCart = (item: Omit<ShopCartItem, 'quantity'>) => {
     setShopCart((prev) => {
