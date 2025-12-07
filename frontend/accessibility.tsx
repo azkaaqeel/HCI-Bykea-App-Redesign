@@ -1,10 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { ColorblindType, getColorblindCSSVars } from './colorTransformations';
 
 type AccessibilityMode = 'normal' | 'colorblind' | 'high-contrast';
 
 interface AccessibilityContextValue {
   mode: AccessibilityMode;
   setMode: (mode: AccessibilityMode) => void;
+  colorblindType: ColorblindType;
+  setColorblindType: (type: ColorblindType) => void;
   isColorblindMode: boolean;
   isHighContrast: boolean;
 }
@@ -24,47 +27,88 @@ export function AccessibilityProvider({ children }: ProviderProps) {
     return (stored as AccessibilityMode) || 'normal';
   });
 
+  const [colorblindType, setColorblindType] = useState<ColorblindType>(() => {
+    if (typeof window === 'undefined') {
+      return 'general';
+    }
+    const stored = window.localStorage.getItem('hci-colorblind-type');
+    return (stored as ColorblindType) || 'general';
+  });
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('hci-accessibility-mode', mode);
-      // Apply CSS class to root element for styling
-      document.documentElement.classList.remove('colorblind-mode', 'high-contrast-mode');
+      window.localStorage.setItem('hci-colorblind-type', colorblindType);
+      
+      // Apply CSS classes to root element
+      document.documentElement.classList.remove(
+        'colorblind-mode',
+        'colorblind-protanopia',
+        'colorblind-deuteranopia',
+        'colorblind-tritanopia',
+        'colorblind-general',
+        'high-contrast-mode'
+      );
       
       if (mode === 'colorblind') {
+        // Add general colorblind class
         document.documentElement.classList.add('colorblind-mode');
-        // Force update green elements to blue
-        const updateGreenElements = () => {
-          const greenElements = document.querySelectorAll('[class*="green"], [class*="00D47C"], [style*="#00D47C"], [style*="rgb(0, 212, 124)"]');
+        // Add specific type class
+        document.documentElement.classList.add(`colorblind-${colorblindType}`);
+        
+        // Apply CSS variables for the specific colorblind type
+        const cssVars = getColorblindCSSVars(colorblindType);
+        Object.entries(cssVars).forEach(([key, value]) => {
+          document.documentElement.style.setProperty(key, value);
+        });
+        
+        // Force update elements with inline styles
+        const updateColorElements = () => {
+          // Update elements with brand green color
+          const greenElements = document.querySelectorAll(
+            '[class*="green"], [class*="00D47C"], [style*="#00D47C"], [style*="rgb(0, 212, 124)"]'
+          );
+          
+          const replacementColor = cssVars['--color-success'];
+          
           greenElements.forEach((el) => {
             const htmlEl = el as HTMLElement;
             if (htmlEl.style) {
               const computed = window.getComputedStyle(htmlEl);
-              if (computed.backgroundColor.includes('rgb(0, 212') || computed.backgroundColor.includes('#00D47C')) {
-                htmlEl.style.setProperty('background-color', '#2563eb', 'important');
+              if (computed.backgroundColor.includes('rgb(0, 212') || 
+                  computed.backgroundColor.includes('#00D47C') ||
+                  computed.backgroundColor.includes('#00be6f')) {
+                htmlEl.style.setProperty('background-color', replacementColor, 'important');
               }
-              if (computed.color.includes('rgb(0, 212') || computed.color.includes('#00D47C')) {
-                htmlEl.style.setProperty('color', '#1e40af', 'important');
+              if (computed.color.includes('rgb(0, 212') || 
+                  computed.color.includes('#00D47C') ||
+                  computed.color.includes('#00be6f')) {
+                htmlEl.style.setProperty('color', cssVars['--color-success-dark'], 'important');
               }
             }
           });
         };
-        // Run immediately and after a short delay to catch dynamically rendered elements
-        setTimeout(updateGreenElements, 100);
-        setTimeout(updateGreenElements, 500);
+        
+        // Run immediately and after delays to catch dynamically rendered elements
+        setTimeout(updateColorElements, 100);
+        setTimeout(updateColorElements, 500);
+        setTimeout(updateColorElements, 1000);
       } else if (mode === 'high-contrast') {
         document.documentElement.classList.add('high-contrast-mode');
       }
     }
-  }, [mode]);
+  }, [mode, colorblindType]);
 
   const value = useMemo<AccessibilityContextValue>(() => {
     return {
       mode,
       setMode,
+      colorblindType,
+      setColorblindType,
       isColorblindMode: mode === 'colorblind',
       isHighContrast: mode === 'high-contrast',
     };
-  }, [mode]);
+  }, [mode, colorblindType]);
 
   return (
     <AccessibilityContext.Provider value={value}>

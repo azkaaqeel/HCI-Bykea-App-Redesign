@@ -24,9 +24,10 @@ export function HelpSupportScreen({
 }: HelpSupportScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const { language, setLanguage, t } = useTranslation();
-  const { mode, setMode, isColorblindMode, isHighContrast } = useAccessibility();
+  const { mode, setMode, colorblindType, setColorblindType, isColorblindMode, isHighContrast } = useAccessibility();
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const [showAccessibilitySelector, setShowAccessibilitySelector] = useState(false);
+  const [showColorblindTypeSelector, setShowColorblindTypeSelector] = useState(false);
 
   const filteredIssues = commonIssuesKeys.filter((issueKey) =>
     t(issueKey).toLowerCase().includes(searchQuery.toLowerCase())
@@ -213,6 +214,9 @@ export function HelpSupportScreen({
                   onClick={() => {
                     setMode('colorblind');
                     setShowAccessibilitySelector(false);
+                    if (mode !== 'colorblind') {
+                      setShowColorblindTypeSelector(true);
+                    }
                   }}
                   className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
                     mode === 'colorblind'
@@ -227,18 +231,123 @@ export function HelpSupportScreen({
                         {t('help.accessibility.colorblind', 'Colorblind Mode')}
                       </span>
                       <span className="text-xs text-gray-500">
-                        {t('help.accessibility.colorblindDesc', 'Icons, patterns & labels')}
+                        {mode === 'colorblind' 
+                          ? t('help.accessibility.colorblindType', `Type: ${colorblindType === 'general' ? 'General' : colorblindType === 'protanopia' ? 'Protanopia' : colorblindType === 'deuteranopia' ? 'Deuteranopia' : 'Tritanopia'}`)
+                          : t('help.accessibility.colorblindDesc', 'Icons, patterns & labels')
+                        }
                       </span>
                     </div>
                   </div>
                   {mode === 'colorblind' && (
-                    <div className="w-5 h-5 rounded-full bg-[#00D47C] flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowColorblindTypeSelector(!showColorblindTypeSelector);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <ChevronRight 
+                          className={`w-4 h-4 text-gray-400 transition-transform ${showColorblindTypeSelector ? 'rotate-90' : ''}`}
+                        />
+                      </button>
+                      <div className="w-5 h-5 rounded-full bg-[#00D47C] flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
                     </div>
                   )}
                 </button>
+                
+                {/* Colorblind Type Selector */}
+                {mode === 'colorblind' && showColorblindTypeSelector && (
+                  <div className="border-t border-gray-200 p-4 space-y-2 bg-gray-50">
+                    <p className="text-xs text-gray-600 mb-2 font-medium">
+                      {t('help.accessibility.selectType', 'Select Colorblind Type:')}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setColorblindType('general');
+                        setShowColorblindTypeSelector(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg border-2 transition-all text-sm ${
+                        colorblindType === 'general'
+                          ? 'border-[#00D47C] bg-blue-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-gray-900">General</span>
+                      {colorblindType === 'general' && (
+                        <div className="w-4 h-4 rounded-full bg-[#00D47C] flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setColorblindType('protanopia');
+                        setShowColorblindTypeSelector(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg border-2 transition-all text-sm ${
+                        colorblindType === 'protanopia'
+                          ? 'border-[#00D47C] bg-blue-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-gray-900">Protanopia (Red-blind)</span>
+                      {colorblindType === 'protanopia' && (
+                        <div className="w-4 h-4 rounded-full bg-[#00D47C] flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setColorblindType('deuteranopia');
+                        setShowColorblindTypeSelector(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg border-2 transition-all text-sm ${
+                        colorblindType === 'deuteranopia'
+                          ? 'border-[#00D47C] bg-blue-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-gray-900">Deuteranopia (Green-blind)</span>
+                      {colorblindType === 'deuteranopia' && (
+                        <div className="w-4 h-4 rounded-full bg-[#00D47C] flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setColorblindType('tritanopia');
+                        setShowColorblindTypeSelector(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg border-2 transition-all text-sm ${
+                        colorblindType === 'tritanopia'
+                          ? 'border-[#00D47C] bg-blue-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-gray-900">Tritanopia (Blue-yellow blind)</span>
+                      {colorblindType === 'tritanopia' && (
+                        <div className="w-4 h-4 rounded-full bg-[#00D47C] flex items-center justify-center">
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                )}
                 
                 <button
                   onClick={() => {
