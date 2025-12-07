@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, Phone, MessageCircle, Book, Mail, Globe, ChevronRight, Eye } from './ui/icons';
+import { ArrowLeft, Search, Phone, MessageCircle, Book, Mail, Globe, ChevronRight, Eye, Play } from './ui/icons';
 import { useState } from 'react';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
@@ -58,8 +58,34 @@ export function HelpSupportScreen({
           </div>
         </div>
 
+        {/* App Tutorial Section */}
+        <div className="px-4 py-3">
+          <button
+            onClick={() => {
+              onBack(); // Go back to home first
+              // Tutorial will be started from App.tsx
+              setTimeout(() => {
+                const event = new CustomEvent('start-tutorial');
+                window.dispatchEvent(event);
+              }, 300);
+            }}
+            className="w-full bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all"
+          >
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Play className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-white font-semibold">
+                {t('help.startTutorial', 'Start App Tutorial')}
+              </span>
+            </div>
+            <p className="text-white/90 text-sm text-center">
+              {t('help.tutorialDesc', 'Learn how to use the app with interactive guide')}
+            </p>
+          </button>
+        </div>
+
         {/* Emergency Support Section */}
-              {/* Emergency Support Section */}
         <div className="px-4 py-3">
           <div className="bg-gradient-to-br from-[#00D47C] to-[#00be6f] rounded-2xl p-5 shadow-lg">
             <button
