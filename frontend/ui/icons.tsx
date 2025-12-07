@@ -810,7 +810,11 @@ export function Heart({ className }: { className?: string }) {
   );
 }
 
+<<<<<<< HEAD
 export function Mic({ className }: { className?: string }) {
+=======
+export function Play({ className }: { className?: string }) {
+>>>>>>> c2fc8f2145328e6a70398daa33a051bb1f031280
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -824,6 +828,7 @@ export function Mic({ className }: { className?: string }) {
       strokeLinejoin="round"
       className={className}
     >
+<<<<<<< HEAD
       <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
       <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
       <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -869,6 +874,9 @@ export function ArrowRight({ className }: { className?: string }) {
     >
       <line x1="5" y1="12" x2="19" y2="12"></line>
       <polyline points="12 5 19 12 12 19"></polyline>
+=======
+      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+>>>>>>> c2fc8f2145328e6a70398daa33a051bb1f031280
     </svg>
   );
 }

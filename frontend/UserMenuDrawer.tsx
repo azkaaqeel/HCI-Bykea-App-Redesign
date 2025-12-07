@@ -1,7 +1,9 @@
 import { Sheet, SheetContent } from './ui/sheet';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
-import { Phone, Globe, Info, Filter, Clock, Wallet, Bell } from './ui/icons';
+import { Phone, Globe, Info, Filter, Clock, Wallet, Bell, ChevronRight, Eye } from './ui/icons';
+import { ColorblindType } from './colorTransformations';
+import { useState } from 'react';
 
 interface UserMenuDrawerProps {
   open: boolean;
@@ -11,7 +13,8 @@ interface UserMenuDrawerProps {
 
 export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
-  const { mode, setMode } = useAccessibility();
+  const { mode, setMode, colorblindType, setColorblindType } = useAccessibility();
+  const [showAccessibilityOptions, setShowAccessibilityOptions] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -47,16 +50,151 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
           </button>
           <button
             className="w-full flex items-center justify-between py-3"
-            onClick={() =>
-              setMode(mode === 'high-contrast' ? 'normal' : 'high-contrast')
-            }
+            onClick={() => setShowAccessibilityOptions(!showAccessibilityOptions)}
           >
             <div className="flex items-center gap-3 text-gray-800">
-              <Filter className="w-5 h-5 text-[#00A859]" />
-              <span>Accessibility</span>
+              <Eye className="w-5 h-5 text-[#00A859]" />
+              <span>{t('menu.accessibility', 'Accessibility')}</span>
             </div>
-            <span className="text-xs text-gray-500 capitalize">{mode}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 capitalize">
+                {mode === 'normal' ? 'Normal' : mode === 'colorblind' 
+                  ? `Colorblind (${colorblindType === 'general' ? 'General' : colorblindType === 'protanopia' ? 'Protanopia' : colorblindType === 'deuteranopia' ? 'Deuteranopia' : 'Tritanopia'})`
+                  : 'High Contrast'}
+              </span>
+              <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${showAccessibilityOptions ? 'rotate-90' : ''}`} />
+            </div>
           </button>
+          
+          {/* Accessibility Options */}
+          {showAccessibilityOptions && (
+            <div className="ml-8 mr-4 mb-2 space-y-1 bg-gray-50 rounded-lg p-3">
+              {/* Normal Mode */}
+              <button
+                onClick={() => {
+                  setMode('normal');
+                  setShowAccessibilityOptions(false);
+                }}
+                className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
+                  mode === 'normal'
+                    ? 'bg-[#00D47C] text-white'
+                    : 'bg-white hover:bg-gray-100 text-gray-800'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">👁️</span>
+                  <span>{t('help.accessibility.normal', 'Normal')}</span>
+                </div>
+                {mode === 'normal' && (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Colorblind Mode */}
+              <button
+                onClick={() => {
+                  setMode('colorblind');
+                  setShowAccessibilityOptions(false);
+                }}
+                className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
+                  mode === 'colorblind'
+                    ? 'bg-[#00D47C] text-white'
+                    : 'bg-white hover:bg-gray-100 text-gray-800'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🎨</span>
+                  <span>{t('help.accessibility.colorblind', 'Colorblind Mode')}</span>
+                </div>
+                {mode === 'colorblind' && (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+
+              {/* Colorblind Type Selector (shown when colorblind mode is active) */}
+              {mode === 'colorblind' && (
+                <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#00D47C] pl-3">
+                  <button
+                    onClick={() => setColorblindType('general')}
+                    className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
+                      colorblindType === 'general'
+                        ? 'text-[#00D47C] font-semibold'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <span>General</span>
+                    {colorblindType === 'general' && (
+                      <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setColorblindType('protanopia')}
+                    className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
+                      colorblindType === 'protanopia'
+                        ? 'text-[#00D47C] font-semibold'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <span>Protanopia</span>
+                    {colorblindType === 'protanopia' && (
+                      <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setColorblindType('deuteranopia')}
+                    className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
+                      colorblindType === 'deuteranopia'
+                        ? 'text-[#00D47C] font-semibold'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <span>Deuteranopia</span>
+                    {colorblindType === 'deuteranopia' && (
+                      <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setColorblindType('tritanopia')}
+                    className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
+                      colorblindType === 'tritanopia'
+                        ? 'text-[#00D47C] font-semibold'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <span>Tritanopia</span>
+                    {colorblindType === 'tritanopia' && (
+                      <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* High Contrast Mode */}
+              <button
+                onClick={() => {
+                  setMode('high-contrast');
+                  setShowAccessibilityOptions(false);
+                }}
+                className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
+                  mode === 'high-contrast'
+                    ? 'bg-[#00D47C] text-white'
+                    : 'bg-white hover:bg-gray-100 text-gray-800'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🔲</span>
+                  <span>{t('help.accessibility.highContrast', 'High Contrast')}</span>
+                </div>
+                {mode === 'high-contrast' && (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          )}
           <MenuItem
   icon={Info}
   label="Help & Support"

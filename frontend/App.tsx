@@ -28,6 +28,8 @@ import { VerifyOtpScreen } from './VerifyOtpScreen';
 import { UserMenuDrawer } from './UserMenuDrawer';
 import { LiveChatScreen } from './LiveChatScreen';
 import { CallSupportScreen } from './CallSupportScreen';
+import { useTutorial } from './TutorialProvider';
+import { TutorialStep } from './TutorialOverlay';
 
 
 
@@ -54,6 +56,7 @@ type ScreenType =
 
 export default function App() {
   const { language, toggleLanguage, t } = useTranslation();
+  const { startTutorial, goToStep, showSelectionScreen } = useTutorial();
   const [screenHistory, setScreenHistory] = useState<ScreenType[]>(['home']);
   const currentScreen = screenHistory[screenHistory.length - 1];
   const [showLanguageModal, setShowLanguageModal] = useState(() => {
@@ -112,6 +115,298 @@ export default function App() {
       if (!currentDropoffLocation) setCurrentDropoffLocation(defaultDropoff);
     }
   }, [language]);
+
+  // Tutorial flows configuration
+  const rideTutorialSteps: TutorialStep[] = [
+    {
+      id: 'ride-home-location',
+      screen: 'home',
+      target: '[data-tutorial="location-card"]',
+      position: 'top',
+      title: 'tutorial.ride.location',
+      description: 'tutorial.ride.locationDesc',
+      action: () => {
+        navigateTo('home');
+        setActiveBottomTab('ride');
+      },
+    },
+    {
+      id: 'ride-location-selection',
+      screen: 'location-selection',
+      position: 'center',
+      title: 'tutorial.ride.selectLocation',
+      description: 'tutorial.ride.selectLocationDesc',
+      action: () => {
+        navigateTo('location-selection');
+        setLocationType('pickup');
+      },
+    },
+    {
+      id: 'ride-location-confirmation',
+      screen: 'location-confirmation',
+      position: 'center',
+      title: 'tutorial.ride.confirmLocation',
+      description: 'tutorial.ride.confirmLocationDesc',
+      action: () => {
+        navigateTo('location-confirmation');
+      },
+    },
+    {
+      id: 'ride-booking-vehicle',
+      screen: 'booking',
+      target: '[data-tutorial="vehicle-selection"]',
+      position: 'top',
+      title: 'tutorial.ride.vehicle',
+      description: 'tutorial.ride.vehicleDesc',
+      action: () => {
+        navigateTo('booking');
+      },
+    },
+    {
+      id: 'ride-booking-payment',
+      screen: 'booking',
+      target: '[data-tutorial="payment-selection"]',
+      position: 'top',
+      title: 'tutorial.ride.payment',
+      description: 'tutorial.ride.paymentDesc',
+      action: () => {
+        navigateTo('booking');
+      },
+    },
+    {
+      id: 'ride-driver-search',
+      screen: 'searching-drivers',
+      position: 'center',
+      title: 'tutorial.ride.driverSearch',
+      description: 'tutorial.ride.driverSearchDesc',
+      action: () => {
+        navigateTo('searching-drivers');
+      },
+    },
+    {
+      id: 'ride-driver-offers',
+      screen: 'driver-offers',
+      target: '[data-tutorial="driver-offers"]',
+      position: 'top',
+      title: 'tutorial.ride.driverOffers',
+      description: 'tutorial.ride.driverOffersDesc',
+      action: () => {
+        navigateTo('driver-offers');
+      },
+    },
+    {
+      id: 'ride-tracking',
+      screen: 'ride-tracking',
+      position: 'center',
+      title: 'tutorial.ride.tracking',
+      description: 'tutorial.ride.trackingDesc',
+      action: () => {
+        navigateTo('ride-tracking');
+        setSelectedDriverName('Muhammad Ali');
+        setSelectedDriverRating(4.9);
+        setSelectedFare(320);
+      },
+    },
+    {
+      id: 'ride-cancel',
+      screen: 'ride-tracking',
+      target: '[data-tutorial="cancel-ride"]',
+      position: 'top',
+      title: 'tutorial.ride.cancel',
+      description: 'tutorial.ride.cancelDesc',
+      action: () => {
+        navigateTo('ride-tracking');
+        setSelectedDriverName('Muhammad Ali');
+        setSelectedDriverRating(4.9);
+        setSelectedFare(320);
+      },
+    },
+    {
+      id: 'ride-emergency',
+      screen: 'ride-tracking',
+      target: '[data-tutorial="emergency-sos"]',
+      position: 'top',
+      title: 'tutorial.ride.emergency',
+      description: 'tutorial.ride.emergencyDesc',
+      action: () => {
+        navigateTo('ride-tracking');
+        setSelectedDriverName('Muhammad Ali');
+        setSelectedDriverRating(4.9);
+        setSelectedFare(320);
+      },
+    },
+  ];
+
+  const deliveryTutorialSteps: TutorialStep[] = [
+    {
+      id: 'delivery-home',
+      screen: 'home',
+      target: '[data-tutorial="bottom-nav"]',
+      position: 'top',
+      title: 'tutorial.delivery.switchTab',
+      description: 'tutorial.delivery.switchTabDesc',
+      action: () => {
+        navigateTo('home');
+        setActiveBottomTab('delivery');
+      },
+    },
+    {
+      id: 'delivery-pick-from',
+      screen: 'delivery-pick-from',
+      position: 'center',
+      title: 'tutorial.delivery.pickFrom',
+      description: 'tutorial.delivery.pickFromDesc',
+      action: () => {
+        navigateTo('delivery-pick-from');
+        setActiveBottomTab('delivery');
+      },
+    },
+    {
+      id: 'delivery-location-pickup',
+      screen: 'delivery-location',
+      position: 'center',
+      title: 'tutorial.delivery.enterPickup',
+      description: 'tutorial.delivery.enterPickupDesc',
+      action: () => {
+        navigateTo('delivery-location');
+        setDeliveryLocationType('pickup');
+      },
+    },
+    {
+      id: 'delivery-location-delivery',
+      screen: 'delivery-location',
+      position: 'center',
+      title: 'tutorial.delivery.enterDelivery',
+      description: 'tutorial.delivery.enterDeliveryDesc',
+      action: () => {
+        navigateTo('delivery-location');
+        setDeliveryLocationType('delivery');
+      },
+    },
+    {
+      id: 'delivery-parcel-details',
+      screen: 'parcel-details',
+      position: 'center',
+      title: 'tutorial.delivery.parcelDetails',
+      description: 'tutorial.delivery.parcelDetailsDesc',
+      action: () => {
+        navigateTo('parcel-details');
+      },
+    },
+    {
+      id: 'delivery-order-placed',
+      screen: 'order-placed',
+      position: 'center',
+      title: 'tutorial.delivery.orderPlaced',
+      description: 'tutorial.delivery.orderPlacedDesc',
+      action: () => {
+        navigateTo('order-placed');
+      },
+    },
+  ];
+
+  const shopsTutorialSteps: TutorialStep[] = [
+    {
+      id: 'shops-home',
+      screen: 'home',
+      target: '[data-tutorial="bottom-nav"]',
+      position: 'top',
+      title: 'tutorial.shops.switchTab',
+      description: 'tutorial.shops.switchTabDesc',
+      action: () => {
+        navigateTo('home');
+        setActiveBottomTab('shops');
+      },
+    },
+    {
+      id: 'shops-browse',
+      screen: 'shops',
+      position: 'center',
+      title: 'tutorial.shops.browse',
+      description: 'tutorial.shops.browseDesc',
+      action: () => {
+        navigateTo('shops');
+        setActiveBottomTab('shops');
+      },
+    },
+    {
+      id: 'shops-detail',
+      screen: 'shop-detail',
+      position: 'center',
+      title: 'tutorial.shops.detail',
+      description: 'tutorial.shops.detailDesc',
+      action: () => {
+        setSelectedShop({ name: 'Fresh Mart', branch: 'Gulshan' });
+        navigateTo('shop-detail');
+      },
+    },
+    {
+      id: 'shops-cart',
+      screen: 'shop-cart',
+      position: 'center',
+      title: 'tutorial.shops.cart',
+      description: 'tutorial.shops.cartDesc',
+      action: () => {
+        navigateTo('shop-cart');
+      },
+    },
+    {
+      id: 'shops-checkout',
+      screen: 'shop-checkout',
+      position: 'center',
+      title: 'tutorial.shops.checkout',
+      description: 'tutorial.shops.checkoutDesc',
+      action: () => {
+        navigateTo('shop-checkout');
+      },
+    },
+  ];
+
+  // Listen for tutorial start event
+  useEffect(() => {
+    const handleStartTutorial = () => {
+      // Show selection screen first
+      showSelectionScreen();
+    };
+
+    const handleSelectFlow = (event: CustomEvent<{ flow: 'ride' | 'delivery' | 'shops' }>) => {
+      const { flow } = event.detail;
+      let steps: TutorialStep[] = [];
+      
+      if (flow === 'ride') {
+        steps = rideTutorialSteps;
+      } else if (flow === 'delivery') {
+        steps = deliveryTutorialSteps;
+      } else if (flow === 'shops') {
+        steps = shopsTutorialSteps;
+      }
+
+      if (steps.length > 0) {
+        // When flow finishes, show selection screen again
+        // When tutorial is closed, navigate to help-support
+        startTutorial(steps, () => {
+          showSelectionScreen();
+        });
+        // Navigate to first step's screen
+        if (steps[0]?.action) {
+          steps[0].action();
+        }
+      }
+    };
+
+    const handleCloseToHelp = () => {
+      navigateTo('help-support');
+    };
+
+    window.addEventListener('start-tutorial', handleStartTutorial);
+    window.addEventListener('tutorial-select-flow', handleSelectFlow as EventListener);
+    window.addEventListener('tutorial-close-to-help', handleCloseToHelp);
+    return () => {
+      window.removeEventListener('start-tutorial', handleStartTutorial);
+      window.removeEventListener('tutorial-select-flow', handleSelectFlow as EventListener);
+      window.removeEventListener('tutorial-close-to-help', handleCloseToHelp);
+    };
+  }, [startTutorial, showSelectionScreen, rideTutorialSteps, deliveryTutorialSteps, shopsTutorialSteps]);
 
   const goBack = () => {
     setScreenHistory((prev) => {
@@ -581,15 +876,19 @@ if (currentScreen === 'call-Support') {
       {/* Promo Banner and Location Card Container */}
       <div className="absolute bottom-40 left-0 right-0 z-30 px-3 flex flex-col gap-4 pb-4">
         <PromoBanner />
-        <LocationCard 
-          pickupLocation={pickupLocation}
-          dropoffLocation={dropoffLocation}
-          onOpenLocationSelection={handleOpenLocationSelection}
-        />
+        <div data-tutorial="location-card">
+          <LocationCard 
+            pickupLocation={pickupLocation}
+            dropoffLocation={dropoffLocation}
+            onOpenLocationSelection={handleOpenLocationSelection}
+          />
+        </div>
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab={activeBottomTab} onTabChange={handleBottomTabChange} />
+      <div data-tutorial="bottom-nav">
+        <BottomNav activeTab={activeBottomTab} onTabChange={handleBottomTabChange} />
+      </div>
 
       {/* Home Indicator */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-black rounded-full"></div>

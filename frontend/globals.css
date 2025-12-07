@@ -194,38 +194,82 @@ html {
   font-size: var(--font-size);
 }
 
-/* Colorblind Accessibility Mode */
+/* Colorblind Accessibility Mode - Base styles */
 html.colorblind-mode {
-  /* Enhanced contrast for colorblind users */
-  --color-success: #2563eb; /* Blue instead of green */
+  /* CSS variables will be set dynamically via JavaScript based on colorblind type */
+}
+
+/* General Colorblind Mode (default) */
+html.colorblind-general {
+  --color-success: #2563eb;
   --color-success-light: #dbeafe;
-  --color-warning: #dc2626; /* Red for warnings */
+  --color-success-dark: #1e40af;
+  --color-warning: #dc2626;
   --color-warning-light: #fee2e2;
-  --color-info: #7c3aed; /* Purple for info */
+  --color-info: #7c3aed;
   --color-info-light: #ede9fe;
   --color-error: #dc2626;
   --color-error-light: #fee2e2;
 }
 
-/* Override green colors with blue in colorblind mode - HIGH SPECIFICITY */
+/* Protanopia Mode */
+html.colorblind-protanopia {
+  --color-success: #1e90ff;
+  --color-success-light: #d6e9ff;
+  --color-success-dark: #0066cc;
+  --color-warning: #ff4444;
+  --color-warning-light: #ffe6e6;
+  --color-info: #8b5cf6;
+  --color-info-light: #ede9fe;
+  --color-error: #ff4444;
+  --color-error-light: #ffe6e6;
+}
+
+/* Deuteranopia Mode */
+html.colorblind-deuteranopia {
+  --color-success: #3b82f6;
+  --color-success-light: #dbeafe;
+  --color-success-dark: #1e40af;
+  --color-warning: #ff4444;
+  --color-warning-light: #ffe6e6;
+  --color-info: #8b5cf6;
+  --color-info-light: #ede9fe;
+  --color-error: #ff4444;
+  --color-error-light: #ffe6e6;
+}
+
+/* Tritanopia Mode */
+html.colorblind-tritanopia {
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-success-dark: #047857;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-info: #8b5cf6;
+  --color-info-light: #ede9fe;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+}
+
+/* Override green colors in colorblind mode - Uses CSS variables for type-specific colors */
 html.colorblind-mode .bg-green-200,
 html.colorblind-mode .bg-green-50,
 html.colorblind-mode .bg-green-100,
 html.colorblind-mode .bg-green-500,
 html.colorblind-mode button.bg-green-200,
 html.colorblind-mode [class*="bg-green"] {
-  background-color: #2563eb !important;
+  background-color: var(--color-success) !important;
 }
 
 html.colorblind-mode .text-green-600,
 html.colorblind-mode .text-green-700,
 html.colorblind-mode .text-green-900 {
-  color: #1e40af !important;
+  color: var(--color-success-dark) !important;
 }
 
 html.colorblind-mode .border-green-200,
 html.colorblind-mode .border-green-500 {
-  border-color: #2563eb !important;
+  border-color: var(--color-success) !important;
 }
 
 /* Target Tailwind arbitrary values - Tailwind escapes brackets */
@@ -233,12 +277,12 @@ html.colorblind-mode [class*="bg-\\[\\#00D47C\\]"],
 html.colorblind-mode [class*="bg-\\[\\#00d47c\\]"],
 html.colorblind-mode [class*="00D47C"],
 html.colorblind-mode [class*="00d47c"] {
-  background-color: #2563eb !important;
+  background-color: var(--color-success) !important;
 }
 
 html.colorblind-mode [class*="text-\\[\\#00D47C\\]"],
 html.colorblind-mode [class*="text-\\[\\#00d47c\\]"] {
-  color: #1e40af !important;
+  color: var(--color-success-dark) !important;
 }
 
 /* More aggressive - target any element with green-like colors */
@@ -246,14 +290,37 @@ html.colorblind-mode button[class*="green"],
 html.colorblind-mode [class*="green-200"],
 html.colorblind-mode [class*="green-50"],
 html.colorblind-mode [class*="green-100"] {
-  background-color: #2563eb !important;
+  background-color: var(--color-success) !important;
 }
 
-/* Also target inline styles */
+/* Also target inline styles - comprehensive coverage */
 html.colorblind-mode [style*="rgb(0, 212, 124)"],
 html.colorblind-mode [style*="#00D47C"],
-html.colorblind-mode [style*="#00d47c"] {
-  background-color: #2563eb !important;
+html.colorblind-mode [style*="#00d47c"],
+html.colorblind-mode [style*="#00be6f"],
+html.colorblind-mode [style*="rgb(0, 190, 111)"],
+html.colorblind-mode [style*="from-[#00D47C]"],
+html.colorblind-mode [style*="to-[#00be6f]"] {
+  background-color: var(--color-success) !important;
+}
+
+html.colorblind-mode [style*="color: rgb(0, 212, 124)"],
+html.colorblind-mode [style*="color:#00D47C"],
+html.colorblind-mode [style*="color:#00d47c"],
+html.colorblind-mode [style*="color:#00be6f"],
+html.colorblind-mode [style*="border-color:#00D47C"],
+html.colorblind-mode [style*="border-color:rgb(0, 212, 124)"] {
+  color: var(--color-success-dark) !important;
+  border-color: var(--color-success) !important;
+}
+
+/* Comprehensive gradient coverage */
+html.colorblind-mode [class*="from-\\[\\#00D47C\\]"],
+html.colorblind-mode [class*="to-\\[\\#00be6f\\]"],
+html.colorblind-mode [class*="from-green"],
+html.colorblind-mode [class*="to-green"] {
+  --tw-gradient-from: var(--color-success) !important;
+  --tw-gradient-to: var(--color-success-dark) !important;
 }
 
 /* Add patterns to badges and status indicators */

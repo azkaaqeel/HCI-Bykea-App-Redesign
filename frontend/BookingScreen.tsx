@@ -207,10 +207,11 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
         </div>
 
         {/* Payment Method */}
-        <button
-          onClick={() => setIsPaymentSheetOpen(true)}
-          className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-        >
+        <div data-tutorial="payment-selection">
+          <button
+            onClick={() => setIsPaymentSheetOpen(true)}
+            className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
           <div className="flex items-center gap-2">
             {currentPaymentMethod && <currentPaymentMethod.icon className="w-5 h-5 text-gray-600" />}
             <span className="text-black">
@@ -218,7 +219,8 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
             </span>
           </div>
           <ChevronDown className="w-5 h-5 text-gray-400" />
-        </button>
+          </button>
+        </div>
 
         <div className="px-4 pb-4 flex items-start gap-2 bg-blue-50 mx-4 rounded-xl p-3">
           <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
@@ -226,7 +228,7 @@ export function BookingScreen({ onBack, onConfirm, pickupLocation, dropoffLocati
         </div>
 
         {/* Vehicle Selection */}
-        <div className="px-4 py-4 flex gap-3 overflow-x-auto">
+        <div data-tutorial="vehicle-selection" className="px-4 py-4 flex gap-3 overflow-x-auto">
           {vehicles.map((vehicle) => {
             const fare = calculateFare(vehicle);
             return (

@@ -308,6 +308,7 @@ export function RideTrackingScreen({
 
                 {/* Emergency SOS Button */}
                 <button
+                  data-tutorial="emergency-sos"
                   onClick={handleEmergencySOS}
                   className="w-full bg-white border-2 border-red-500 rounded-xl p-4 hover:bg-red-50 transition-colors"
                 >
@@ -333,6 +334,7 @@ export function RideTrackingScreen({
 
             {/* Cancel Ride Link */}
             <button
+              data-tutorial="cancel-ride"
               onClick={() => setShowCancelDialog(true)}
               className="w-full text-center text-sm text-red-500 hover:text-red-600 py-2"
             >
