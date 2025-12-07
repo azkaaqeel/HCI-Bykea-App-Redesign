@@ -8,6 +8,7 @@ import { ShopsScreen } from './ShopsScreen';
 import { ShopDetailScreen } from './ShopDetailScreen';
 import { ShopCartScreen } from './ShopCartScreen';
 import { ShopCheckoutScreen } from './ShopCheckoutScreen';
+import { OrderScreen } from './OrderScreen';
 import { MapPin, Menu } from './ui/icons';
 import { MapView } from './MapView';
 import { PromoBanner } from './PromoBanner';
@@ -48,6 +49,7 @@ type ScreenType =
   | 'shop-detail'
   | 'shop-cart'
   | 'shop-checkout'
+  | 'order'
   |'call-Support';
 
 export default function App() {
@@ -72,6 +74,12 @@ export default function App() {
   const [shopCart, setShopCart] = useState<ShopCartItem[]>([]);
   const [shopTip, setShopTip] = useState(0);
   const [activeBottomTab, setActiveBottomTab] = useState('ride');
+  const [orderShop, setOrderShop] = useState<{ name: string; branch?: string } | null>(null);
+  const [locationSelectionSource, setLocationSelectionSource] = useState<ScreenType | null>(null);
+  
+  // Unified location state - used across all flows
+  const [currentDropoffLocation, setCurrentDropoffLocation] = useState('');
+  const [currentPickupLocation, setCurrentPickupLocation] = useState('');
   
   // Delivery flow states
   const [deliveryPickupAddress, setDeliveryPickupAddress] = useState('');
@@ -94,10 +102,14 @@ export default function App() {
     const defaultDropoffUr = 'ملینیم مال';
 
     if (!pickupLocation || pickupLocation === defaultPickupEn || pickupLocation === defaultPickupUr) {
-      setPickupLocation(language === 'en' ? defaultPickupEn : defaultPickupUr);
+      const defaultPickup = language === 'en' ? defaultPickupEn : defaultPickupUr;
+      setPickupLocation(defaultPickup);
+      if (!currentPickupLocation) setCurrentPickupLocation(defaultPickup);
     }
     if (!dropoffLocation || dropoffLocation === defaultDropoffEn || dropoffLocation === defaultDropoffUr) {
-      setDropoffLocation(language === 'en' ? defaultDropoffEn : defaultDropoffUr);
+      const defaultDropoff = language === 'en' ? defaultDropoffEn : defaultDropoffUr;
+      setDropoffLocation(defaultDropoff);
+      if (!currentDropoffLocation) setCurrentDropoffLocation(defaultDropoff);
     }
   }, [language]);
 
@@ -112,17 +124,25 @@ export default function App() {
 
   const handleOpenLocationSelection = (type: 'pickup' | 'dropoff') => {
     setLocationType(type);
+    setLocationSelectionSource(currentScreen);
     navigateTo('location-selection');
   };
 
   const handleSelectLocation = (location: string) => {
     if (locationType === 'pickup') {
       setPickupLocation(location);
+      setCurrentPickupLocation(location); // Update unified state
       goBack();
     } else {
       setDropoffLocation(location);
-      // After selecting dropoff, go to confirmation screen
-      navigateTo('location-confirmation');
+      setCurrentDropoffLocation(location); // Update unified state
+      // If coming from order screen, go back to it; otherwise go to confirmation
+      if (locationSelectionSource === 'order') {
+        setLocationSelectionSource(null);
+        goBack();
+      } else {
+        navigateTo('location-confirmation');
+      }
     }
   };
 
@@ -185,8 +205,10 @@ export default function App() {
   const handleDeliverySelectLocation = (location: string) => {
     if (deliveryLocationType === 'pickup') {
       setDeliveryPickupAddress(location);
+      setCurrentPickupLocation(location); // Update unified state
     } else {
       setDeliveryDropoffAddress(location);
+      setCurrentDropoffLocation(location); // Update unified state
     }
     navigateTo('delivery-pick-from');
   };
@@ -423,6 +445,36 @@ if (currentScreen === 'call-Support') {
         onShopClick={(shop) => {
           setSelectedShop({ name: shop.name, branch: shop.branch });
           navigateTo('shop-detail');
+        }}
+        onOrderClick={(shop) => {
+          setOrderShop({ name: shop.name, branch: shop.branch });
+          navigateTo('order');
+        }}
+      />
+    );
+  }
+
+  if (currentScreen === 'order') {
+    // Get the most recent dropoff location from any source
+    const activeDropoffLocation = currentDropoffLocation || dropoffLocation || deliveryDropoffAddress || '75270 KU Circular Rd University Of';
+    
+    return (
+      <OrderScreen
+        onBack={goBack}
+        shopName={orderShop?.name}
+        dropAddress={activeDropoffLocation}
+        onUpdateLocation={(location) => {
+          handleUpdateDropoffLocation(location);
+        }}
+        onOpenLocationSelection={() => {
+          setLocationType('dropoff');
+          setLocationSelectionSource('order');
+          navigateTo('location-selection');
+        }}
+        onPlaceOrder={(orderDetails) => {
+          console.log('Order placed:', orderDetails);
+          // Navigate to order placed screen or handle order
+          navigateTo('order-placed');
         }}
       />
     );

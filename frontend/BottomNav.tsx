@@ -66,15 +66,35 @@ export function BottomNav({ activeTab: externalActiveTab, onTabChange }: BottomN
         {/* SHOPS */}
         <button
           onClick={() => handleTabChange('shops')}
-          className={`flex flex-col items-center justify-end gap-2 px-6 py-3 rounded-3xl transition-all flex-1 ${
+          className={`flex flex-col items-center justify-end gap-2 px-6 py-3 rounded-3xl transition-all flex-1 relative ${
             activeTab === 'shops' 
+              ? 'bg-blue-100 h-24 shadow-lg' 
+              : 'bg-gray-100 h-20'
+          }`}
+        >
+          <Store className={`w-6 h-6 ${activeTab === 'shops' ? 'text-blue-600' : 'text-gray-600'}`} />
+          <span className={`text-xs ${activeTab === 'shops' ? 'text-blue-600' : 'text-gray-600'}`}>
+            {t('nav.shops')}
+          </span>
+          {activeTab === 'shops' && (
+            <>
+              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full absolute bottom-1"></div>
+            </>
+          )}
+        </button>
+
+        {/* RENTALS */}
+        <button
+          onClick={() => handleTabChange('rentals')}
+          className={`flex flex-col items-center justify-end gap-2 px-6 py-3 rounded-3xl transition-all flex-1 ${
+            activeTab === 'rentals' 
               ? 'bg-green-200 h-24 shadow-lg' 
               : 'bg-gray-100 h-20'
           }`}
         >
-          <Store className={`w-6 h-6 ${activeTab === 'shops' ? 'text-green-600' : 'text-gray-600'}`} />
-          <span className={`text-xs ${activeTab === 'shops' ? 'text-green-600' : 'text-gray-600'}`}>
-            {t('nav.shops')}
+          <Car className={`w-6 h-6 ${activeTab === 'rentals' ? 'text-green-600' : 'text-gray-600'}`} />
+          <span className={`text-xs ${activeTab === 'rentals' ? 'text-green-600' : 'text-gray-600'}`}>
+            Rentals
           </span>
         </button>
       </div>

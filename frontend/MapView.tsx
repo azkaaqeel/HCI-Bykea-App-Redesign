@@ -41,6 +41,9 @@ type MapViewProps = {
   selectionType?: 'pickup' | 'dropoff';
   showRoute?: boolean;
   homeLabel?: string;
+  onLocateRequest?: () => void;
+  showCurrentLocationPin?: boolean;
+  currentLocationPin?: LatLngTuple | null;
 };
 
 export function MapView({
@@ -49,11 +52,15 @@ export function MapView({
   selectionType,
   showRoute = true,
   homeLabel,
+  onLocateRequest,
+  showCurrentLocationPin = false,
+  currentLocationPin = null,
 }: MapViewProps) {
   const { t } = useTranslation();
   const [userPosition, setUserPosition] = useState<LatLngTuple>(KARACHI_CENTER);
   const [dropoffPosition, setDropoffPosition] = useState<LatLngTuple>(DEFAULT_DROPOFF);
   const [isClient, setIsClient] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<LatLngTuple | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -66,6 +73,7 @@ export function MapView({
       (position) => {
         const coords: LatLngTuple = [position.coords.latitude, position.coords.longitude];
         setUserPosition(coords);
+        setCurrentLocation(coords);
         onUserLocationChange?.(coords);
       },
       () => {
@@ -74,6 +82,7 @@ export function MapView({
       { enableHighAccuracy: true, timeout: 5000 }
     );
   };
+
 
   if (!isClient) {
     return <div className="absolute inset-0 bg-gray-100 animate-pulse" />;
@@ -109,6 +118,35 @@ export function MapView({
       iconSize: [28, 28],
       iconAnchor: [14, 14],
     });
+
+  const getCurrentLocationPinIcon = (): DivIcon => {
+    return divIcon({
+      html: `
+        <div style="
+          width: 24px;
+          height: 24px;
+          background: #2563eb;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        "></div>
+        <div style="
+          position: absolute;
+          top: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-top: 12px solid #2563eb;
+        "></div>
+      `,
+      className: 'current-location-pin',
+      iconSize: [24, 36],
+      iconAnchor: [12, 36],
+    });
+  };
 
   const getPinIcon = (color: string): DivIcon =>
     divIcon({
@@ -169,7 +207,7 @@ export function MapView({
         <MapInteractions onSelectDropoff={setDropoffPosition} onMapClick={onMapClick} />
 
         {/* Keep the map centered on the user's latest position */}
-        <RecenterOnUser position={userPosition} />
+        <RecenterOnUser position={currentLocationPin || currentLocation || userPosition} />
 
         {showRoute && !selectionType && (
           <Polyline
@@ -211,6 +249,14 @@ export function MapView({
               icon={getVehicleIcon(vehicle.type)}
             />
           ))}
+
+        {/* Current location pin when LOCATE button is clicked */}
+        {(showCurrentLocationPin || currentLocationPin) && (currentLocationPin || currentLocation) && (
+          <Marker
+            position={currentLocationPin || currentLocation!}
+            icon={getCurrentLocationPinIcon()}
+          />
+        )}
       </MapContainer>
 
       <button

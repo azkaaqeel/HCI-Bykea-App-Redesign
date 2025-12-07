@@ -1,7 +1,9 @@
-import { ArrowLeft, MapPin, Search, Heart, Clock } from './ui/icons';
+import { useState } from 'react';
+import { ArrowLeft, MapPin, Search, Heart, Clock, ArrowRight } from './ui/icons';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
+import { MapView } from './MapView';
 
 interface ShopInfo {
   id: number;
@@ -16,22 +18,49 @@ interface ShopInfo {
 interface ShopsScreenProps {
   onBack: () => void;
   onShopClick?: (shop: ShopInfo) => void;
+  onOrderClick?: (shop: ShopInfo) => void;
 }
 
-export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
+export function ShopsScreen({ onBack, onShopClick, onOrderClick }: ShopsScreenProps) {
   const { t } = useTranslation();
   const { isColorblindMode } = useAccessibility();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
   const categories = [
-    { name: t('shops.categories.groceries'), key: 'groceries', color: 'bg-green-100', icon: '🛒' },
+    { name: 'Food', key: 'food', color: 'bg-pink-100', icon: '🍔' },
     { name: t('shops.categories.pharmacy'), key: 'pharmacy', color: 'bg-red-100', icon: '💊' },
-    { name: t('shops.categories.electronics'), key: 'electronics', color: 'bg-blue-100', icon: '📱' },
+    { name: t('shops.categories.groceries'), key: 'groceries', color: 'bg-green-100', icon: '🛒' },
     { name: t('shops.categories.bakery'), key: 'bakery', color: 'bg-yellow-100', icon: '🥖' },
-    { name: t('shops.categories.freshBazaar'), key: 'freshBazaar', color: 'bg-orange-100', icon: '🥬' },
+    { name: 'Café', key: 'cafe', color: 'bg-amber-100', icon: '☕' },
   ];
 
-  const popularShops: ShopInfo[] = [
+  const allShops: ShopInfo[] = [
     {
       id: 1,
+      name: 'PG Canteen Karachi University',
+      category: 'Food',
+      deliveryTime: '15–25 min',
+      badge: t('shops.badge.fastDelivery'),
+      badgeColor: 'bg-[#00D47C]',
+    },
+    {
+      id: 2,
+      name: 'Qasim Samosa Shop',
+      category: 'Food',
+      deliveryTime: '20–30 min',
+      badge: t('shops.badge.popular'),
+      badgeColor: 'bg-blue-500',
+    },
+    {
+      id: 3,
+      name: 'Burger Point',
+      category: 'Food',
+      deliveryTime: '15–25 min',
+      badge: t('shops.badge.fastDelivery'),
+      badgeColor: 'bg-[#00D47C]',
+    },
+    {
+      id: 4,
       name: 'Al-Fatah',
       branch: 'Gulshan',
       category: t('shops.categories.groceries'),
@@ -40,7 +69,7 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
       badgeColor: 'bg-[#00D47C]',
     },
     {
-      id: 2,
+      id: 5,
       name: 'Agha Khan Pharmacy',
       branch: 'Clifton',
       category: t('shops.categories.pharmacy'),
@@ -48,25 +77,14 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
       badge: t('shops.badge.discount'),
       badgeColor: 'bg-orange-500',
     },
-    {
-      id: 3,
-      name: 'Metro Cash & Carry',
-      branch: 'Korangi',
-      category: t('shops.categories.groceries'),
-      deliveryTime: '25–35 min',
-      badge: t('shops.badge.popular'),
-      badgeColor: 'bg-blue-500',
-    },
-    {
-      id: 4,
-      name: 'Imtiaz Super Market',
-      branch: 'Bahadurabad',
-      category: t('shops.categories.groceries'),
-      deliveryTime: '20–30 min',
-      badge: t('shops.badge.fastDelivery'),
-      badgeColor: 'bg-[#00D47C]',
-    },
   ];
+
+  const filteredShops = selectedCategory 
+    ? allShops.filter(shop => {
+        const categoryKey = categories.find(c => c.name === shop.category || shop.category.includes(c.name))?.key;
+        return categoryKey === selectedCategory;
+      })
+    : [];
 
   const previousOrders = [
     {
@@ -91,152 +109,97 @@ export function ShopsScreen({ onBack, onShopClick }: ShopsScreenProps) {
 
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
-      {/* Top Header with Back */}
-      <div className="absolute top-4 left-0 right-0 z-40 flex items-center justify-between px-4 bg-white pb-2">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="bg-gray-100 rounded-full p-2 shadow-sm hover:bg-gray-200 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-gray-700" />
-          </button>
-          <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1">
-            <MapPin className="w-4 h-4 text-gray-600" />
-            <span className="text-xs text-gray-800">جامعہ دارالخیر</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="bg-gray-100 rounded-full p-2">
-            <Heart className="w-4 h-4 text-gray-600" />
-          </button>
-          <button className="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
-            <Clock className="w-3 h-3 text-gray-600" />
-            <span className="text-xs text-gray-600">ابھی</span>
-          </button>
-        </div>
+      {/* Map Background */}
+      <div className="absolute inset-0 z-0">
+        <MapView showRoute={false} />
       </div>
 
-      {/* Main Content - Scrollable */}
-      <div className="h-full overflow-y-auto pt-32 pb-40">
-        <div className="px-4">
-          {/* Title */}
-          <h1 className="mb-4">{t('shops.nearby')}</h1>
+      {/* Back Button */}
+      <div className="absolute top-4 left-4 z-30">
+        <button
+          onClick={onBack}
+          className="bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-700" />
+        </button>
+      </div>
 
-          {/* Search Bar */}
-          <div className="flex items-center gap-2 bg-gray-100 rounded-2xl px-4 py-3 mb-6">
-            <Search className="w-5 h-5 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder={t('shops.searchPlaceholder')}
-              className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400"
-            />
-            <button className="bg-white rounded-lg p-2 shadow-sm">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-            </button>
-          </div>
+      {/* Main Content - White Card Overlay */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-3xl shadow-2xl" style={{ height: '70%' }}>
+        <div className="h-full overflow-y-auto pt-6 pb-32">
+          <div className="px-4">
+            {/* Title */}
+            <h1 className="text-3xl font-bold text-blue-600 mb-4">Shops</h1>
 
-          {/* Categories Section */}
-          <div className="mb-6">
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {categories.map((category, index) => {
-                const getPatternStyle = () => {
-                  if (!isColorblindMode) return {};
-                  if (category.color.includes('green')) return {};
-                  if (category.color.includes('yellow')) {
-                    return { backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px)' };
-                  }
-                  if (category.color.includes('orange')) {
-                    return { backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(255,255,255,0.2) 4px, rgba(255,255,255,0.2) 8px)' };
-                  }
-                  return {};
-                };
-                return (
-                  <button 
-                    key={index}
-                    className={`flex-shrink-0 flex flex-col items-center gap-2 ${category.color} rounded-2xl px-6 py-4 min-w-[100px] relative`}
-                    style={getPatternStyle()}
+            {/* Search Bar */}
+            <div className="flex items-center gap-2 border-2 border-[#00D47C] rounded-2xl px-4 py-3 mb-6 bg-white">
+              <Search className="w-5 h-5 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search any store or market in your city"
+                className="flex-1 bg-transparent border-none outline-none text-gray-800 placeholder:text-gray-400"
+              />
+            </div>
+
+            {/* SELECT CATEGORY Label */}
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">SELECT CATEGORY</p>
+            </div>
+
+            {/* Categories Section - Circular Icons */}
+            <div className="mb-6">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {categories.map((category, index) => {
+                  const isSelected = selectedCategory === category.key;
+                  return (
+                    <button 
+                      key={index}
+                      onClick={() => {
+                        setSelectedCategory(isSelected ? null : category.key);
+                      }}
+                      className={`flex-shrink-0 flex flex-col items-center gap-2 ${category.color} rounded-full w-20 h-20 justify-center relative`}
+                    >
+                      <span className="text-3xl">{category.icon}</span>
+                      <span className={`text-xs text-center ${isSelected ? 'font-bold text-black' : 'text-gray-700'}`}>
+                        {category.name}
+                      </span>
+                      {isSelected && (
+                        <>
+                          <div className="absolute inset-0 border-2 border-red-500 rounded-full"></div>
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-black"></div>
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Shop List - Shown when category is selected */}
+            {selectedCategory && filteredShops.length > 0 && (
+              <div className="space-y-3">
+                {filteredShops.map((shop) => (
+                  <button
+                    key={shop.id}
+                    onClick={() => onOrderClick?.(shop)}
+                    className="w-full bg-white border-2 border-[#00D47C] rounded-xl p-4 flex items-center gap-4 text-left hover:shadow-md transition-shadow"
                   >
-                    <span className="text-2xl">{category.icon}</span>
-                    <span className="text-xs text-gray-700">{category.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Popular Shops Section */}
-          <div className="mb-6">
-            <h2 className="mb-3">{t('shops.popular')}</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {popularShops.map((shop) => (
-                <button 
-                  key={shop.id}
-                  onClick={() => onShopClick?.(shop)}
-                  className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow text-left"
-                >
-                  <div className="bg-gray-100 rounded-xl h-24 mb-3 flex items-center justify-center">
-                    <span className="text-3xl">🏪</span>
-                  </div>
-                  <h3 className="mb-1 text-gray-800">{shop.name}</h3>
-                  <p className="text-xs text-gray-500 mb-2">{shop.category}</p>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-gray-400" />
-                      <span className="text-xs text-gray-600">{shop.deliveryTime}</span>
+                    <div className="bg-pink-100 rounded-lg w-12 h-12 flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">🍔</span>
                     </div>
-                  </div>
-                  <div className={`${shop.badgeColor} text-white rounded-full px-2 py-1 text-xs inline-block relative`}>
-                    {isColorblindMode && shop.badgeColor.includes('green') && (
-                      <span className="mr-1">✓</span>
-                    )}
-                    {isColorblindMode && shop.badgeColor.includes('orange') && (
-                      <span className="mr-1">%</span>
-                    )}
-                    {isColorblindMode && shop.badgeColor.includes('blue') && (
-                      <span className="mr-1">★</span>
-                    )}
-                    {shop.badge}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800 mb-1">{shop.name}</h3>
+                      <p className="text-sm text-gray-500">{shop.category}</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
 
-          {/* Promotional Banner */}
-          <div className="mb-6 bg-gradient-to-r from-[#00D47C] to-[#00b869] rounded-2xl p-6 text-white shadow-lg">
-            <h2 className="text-white mb-2">پہلے آرڈر پر 30٪ رعایت! 🎉</h2>
-            <p className="text-sm text-white/90 mb-4">چیک آؤٹ پر FIRSTORDER کوڈ استعمال کریں</p>
-            <button className="bg-white text-[#00D47C] px-6 py-2 rounded-full">
-              ابھی خریدیں
-            </button>
-          </div>
-
-          {/* Previous Orders Section */}
-          <div className="mb-6">
-            <h2 className="mb-3">{t('shops.orderAgain')}</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {previousOrders.map((order) => (
-                <div 
-                  key={order.id}
-                  className="flex-shrink-0 bg-white border border-gray-200 rounded-2xl p-4 min-w-[160px] shadow-sm"
-                >
-                  <div className="bg-gray-100 rounded-xl h-20 mb-3 flex items-center justify-center">
-                    <span className="text-2xl">🛍️</span>
-                  </div>
-                  <h3 className="mb-1 text-gray-800">{order.shopName}</h3>
-                  <p className="text-xs text-gray-500 mb-2">{order.items}</p>
-                  <p className="text-sm text-[#00D47C]">{order.amount}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Home Indicator */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-black rounded-full"></div>
 
       <style>{`
         .scrollbar-hide::-webkit-scrollbar {
