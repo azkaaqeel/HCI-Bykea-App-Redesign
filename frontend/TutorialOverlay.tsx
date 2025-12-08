@@ -30,7 +30,7 @@ export function TutorialOverlay({
   isActive,
 }: TutorialOverlayProps) {
   const { t } = useTranslation();
-  const [position, setPosition] = useState({ top: 0, left: 0, arrow: 'bottom' as const });
+  const [position, setPosition] = useState<{ top: number; left: number; arrow: 'top' | 'bottom' | 'left' | 'right' }>({ top: 0, left: 0, arrow: 'bottom' });
   const overlayRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -144,7 +144,7 @@ export function TutorialOverlay({
       {/* Backdrop - no blur so user can see what popup refers to */}
       <div
         className="fixed inset-0 bg-black/30 z-[9997]"
-        onClick={onClose}
+        onClick={() => onClose()}
       />
 
       {/* Popup */}
