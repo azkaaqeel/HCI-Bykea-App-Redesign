@@ -2,6 +2,7 @@ import { ArrowLeft, MapPin } from './ui/icons';
 import { MapView } from './MapView';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface DeliveryPickFromScreenProps {
   onBack: () => void;
@@ -22,6 +23,7 @@ export function DeliveryPickFromScreen({
 }: DeliveryPickFromScreenProps) {
   const { t } = useTranslation();
   const { isColorblindMode } = useAccessibility();
+  usePageAnnouncement(t('voice.deliveryScreen', 'Delivery Screen'));
   const bothAddressesEntered = pickupAddress && deliveryAddress;
 
   return (

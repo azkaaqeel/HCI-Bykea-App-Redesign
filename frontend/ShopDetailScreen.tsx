@@ -1,6 +1,7 @@
 import { ArrowLeft, Search, Info, ShoppingBag, Plus, ChevronDown, ChevronRight } from './ui/icons';
 import { ShopCartItem } from './types';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement, useVoiceAnnouncements } from './useVoiceAnnouncements';
 
 interface ShopDetailScreenProps {
   onBack: () => void;
@@ -20,6 +21,8 @@ export function ShopDetailScreen({
   onCheckout,
 }: ShopDetailScreenProps) {
   const { t } = useTranslation();
+  const { announceAction } = useVoiceAnnouncements();
+  usePageAnnouncement(t('voice.shopDetail', `Shop: ${shopName}`), [shopName]);
   const getTotalItems = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };

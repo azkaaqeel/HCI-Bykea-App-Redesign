@@ -13,7 +13,7 @@ interface UserMenuDrawerProps {
 
 export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
-  const { mode, setMode, colorblindType, setColorblindType } = useAccessibility();
+  const { mode, setMode, colorblindType, setColorblindType, voiceAnnouncementsEnabled, setVoiceAnnouncementsEnabled } = useAccessibility();
   const [showAccessibilityOptions, setShowAccessibilityOptions] = useState(false);
 
   return (
@@ -192,6 +192,30 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
+              </button>
+
+              {/* Voice Announcements Toggle */}
+              <button
+                onClick={() => {
+                  setVoiceAnnouncementsEnabled(!voiceAnnouncementsEnabled);
+                }}
+                className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
+                  voiceAnnouncementsEnabled
+                    ? 'bg-[#00D47C] text-white'
+                    : 'bg-white hover:bg-gray-100 text-gray-800'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🔊</span>
+                  <span>{t('help.accessibility.voiceAnnouncements', 'Voice Announcements')}</span>
+                </div>
+                <div className={`w-10 h-5 rounded-full transition-colors flex items-center ${
+                  voiceAnnouncementsEnabled ? 'bg-white/30' : 'bg-gray-300'
+                }`}>
+                  <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform ${
+                    voiceAnnouncementsEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}></div>
+                </div>
               </button>
             </div>
           )}

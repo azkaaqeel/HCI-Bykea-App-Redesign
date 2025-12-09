@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
 import { useTranslation } from './i18n';
 import { MapView } from './MapView';
+import { usePageAnnouncement, useVoiceAnnouncements } from './useVoiceAnnouncements';
 
 interface LocationSelectionScreenProps {
   onBack: () => void;
@@ -42,6 +43,8 @@ const areas = (t: (key: string) => string) => [
 
 export function LocationSelectionScreen({ onBack, onSelectLocation, type }: LocationSelectionScreenProps) {
   const { t, language } = useTranslation();
+  const { announceAction } = useVoiceAnnouncements();
+  usePageAnnouncement(t('voice.locationSelection', `Select ${type === 'pickup' ? 'pickup' : 'dropoff'} location`), [type]);
   const [activeTab, setActiveTab] = useState<'recent' | 'map' | 'area'>('area');
   const [searchQuery, setSearchQuery] = useState('');
   const [mapSelection, setMapSelection] = useState<LatLngTuple | null>(null);
@@ -132,7 +135,10 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
                   return (
                     <button
                       key={index}
-                      onClick={() => onSelectLocation(address.address)}
+                      onClick={() => {
+                        announceAction(t('voice.locationSelected', `Location selected: ${address.address}`));
+                        onSelectLocation(address.address);
+                      }}
                       className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors text-left"
                     >
                       <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -161,7 +167,10 @@ export function LocationSelectionScreen({ onBack, onSelectLocation, type }: Loca
                 {filteredRecent.map((location, index) => (
                   <button
                     key={index}
-                    onClick={() => onSelectLocation(location)}
+                    onClick={() => {
+                      announceAction(t('voice.locationSelected', `Location selected: ${location}`));
+                      onSelectLocation(location);
+                    }}
                     className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors text-left"
                   >
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">

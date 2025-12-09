@@ -2,6 +2,7 @@ import { ArrowLeft, Search, MapPin, Clock } from './ui/icons';
 import { useState } from 'react';
 import { MapView } from './MapView';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface DeliveryLocationScreenProps {
   onBack: () => void;
@@ -38,6 +39,7 @@ export function DeliveryLocationScreen({
   type,
 }: DeliveryLocationScreenProps) {
   const { t } = useTranslation();
+  usePageAnnouncement(t('voice.deliveryLocation', `Select ${type === 'pickup' ? 'pickup' : 'delivery'} location`), [type]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredAddresses = recentAddresses(t).filter(

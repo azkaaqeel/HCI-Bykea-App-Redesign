@@ -9,7 +9,7 @@ import { ShopDetailScreen } from './ShopDetailScreen';
 import { ShopCartScreen } from './ShopCartScreen';
 import { ShopCheckoutScreen } from './ShopCheckoutScreen';
 import { OrderScreen } from './OrderScreen';
-import { MapPin, Menu } from './ui/icons';
+import { MapPin, Menu, Volume2, VolumeX } from './ui/icons';
 import { MapView } from './MapView';
 import { PromoBanner } from './PromoBanner';
 import { LocationCard } from './LocationCard';
@@ -28,8 +28,12 @@ import { VerifyOtpScreen } from './VerifyOtpScreen';
 import { UserMenuDrawer } from './UserMenuDrawer';
 import { LiveChatScreen } from './LiveChatScreen';
 import { CallSupportScreen } from './CallSupportScreen';
+import { RentalScreen } from './RentalScreen';
+import { RentalBookingScreen } from './RentalBookingScreen';
 import { useTutorial } from './TutorialProvider';
 import { TutorialStep } from './TutorialOverlay';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
+import { useAccessibility } from './accessibility';
 
 
 
@@ -52,13 +56,22 @@ type ScreenType =
   | 'shop-cart'
   | 'shop-checkout'
   | 'order'
-  |'call-Support';
+  | 'call-Support'
+  | 'rental'
+  | 'rental-booking';
 
 export default function App() {
   const { language, toggleLanguage, t } = useTranslation();
   const { startTutorial, goToStep, showSelectionScreen } = useTutorial();
+  const { voiceAnnouncementsEnabled, setVoiceAnnouncementsEnabled } = useAccessibility();
   const [screenHistory, setScreenHistory] = useState<ScreenType[]>(['home']);
   const currentScreen = screenHistory[screenHistory.length - 1];
+  
+  // Announce home screen when on home
+  usePageAnnouncement(
+    currentScreen === 'home' ? t('voice.homeScreen', 'Home Screen') : '',
+    [currentScreen]
+  );
   const [showLanguageModal, setShowLanguageModal] = useState(() => {
     if (typeof window === 'undefined') return false;
     const hasSeenLanguagePrompt = window.localStorage.getItem('hci-language-prompt-seen');
@@ -70,8 +83,19 @@ export default function App() {
   const [selectedVehicle, setSelectedVehicle] = useState('bike');
   const [selectedPayment, setSelectedPayment] = useState('cash');
   const [selectedDriverId, setSelectedDriverId] = useState('');
-  const [selectedDriverName, setSelectedDriverName] = useState('Muhammad Ali');
-  const [selectedDriverRating, setSelectedDriverRating] = useState(4.9);
+  const [selectedDriver, setSelectedDriver] = useState<{
+    id: string;
+    name: string;
+    photo: string;
+    rating: number;
+    totalTrips: number;
+    vehicleType: string;
+    vehicleModel: string;
+    vehicleColor: string;
+    vehiclePlate: string;
+    price: number;
+    isVerified: boolean;
+  } | null>(null);
   const [selectedFare, setSelectedFare] = useState(320);
   const [selectedShop, setSelectedShop] = useState<{ name: string; branch?: string } | null>(null);
   const [shopCart, setShopCart] = useState<ShopCartItem[]>([]);
@@ -92,6 +116,12 @@ export default function App() {
   const [trackingId, setTrackingId] = useState('');
   const [authStep, setAuthStep] = useState<'sign-in' | 'verify' | 'done'>('sign-in');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
+  // Rental flow states
+  const [rentalPickupLocation, setRentalPickupLocation] = useState('');
+  const [rentalHours, setRentalHours] = useState(2);
+  const [rentalVehicle, setRentalVehicle] = useState('motorcycle');
+  const [rentalPayment, setRentalPayment] = useState('cash');
 
   const navigateTo = (screen: ScreenType) => {
     setScreenHistory((prev) => [...prev, screen]);
@@ -202,8 +232,19 @@ export default function App() {
       description: 'tutorial.ride.trackingDesc',
       action: () => {
         navigateTo('ride-tracking');
-        setSelectedDriverName('Muhammad Ali');
-        setSelectedDriverRating(4.9);
+        setSelectedDriver({
+          id: '1',
+          name: 'Muhammad Ali',
+          photo: '👨',
+          rating: 4.9,
+          totalTrips: 234,
+          vehicleType: 'Bike',
+          vehicleModel: 'Honda 125',
+          vehicleColor: 'Black',
+          vehiclePlate: 'ABC-123',
+          price: 320,
+          isVerified: true,
+        });
         setSelectedFare(320);
       },
     },
@@ -216,8 +257,19 @@ export default function App() {
       description: 'tutorial.ride.cancelDesc',
       action: () => {
         navigateTo('ride-tracking');
-        setSelectedDriverName('Muhammad Ali');
-        setSelectedDriverRating(4.9);
+        setSelectedDriver({
+          id: '1',
+          name: 'Muhammad Ali',
+          photo: '👨',
+          rating: 4.9,
+          totalTrips: 234,
+          vehicleType: 'Bike',
+          vehicleModel: 'Honda 125',
+          vehicleColor: 'Black',
+          vehiclePlate: 'ABC-123',
+          price: 320,
+          isVerified: true,
+        });
         setSelectedFare(320);
       },
     },
@@ -230,8 +282,19 @@ export default function App() {
       description: 'tutorial.ride.emergencyDesc',
       action: () => {
         navigateTo('ride-tracking');
-        setSelectedDriverName('Muhammad Ali');
-        setSelectedDriverRating(4.9);
+        setSelectedDriver({
+          id: '1',
+          name: 'Muhammad Ali',
+          photo: '👨',
+          rating: 4.9,
+          totalTrips: 234,
+          vehicleType: 'Bike',
+          vehicleModel: 'Honda 125',
+          vehicleColor: 'Black',
+          vehiclePlate: 'ABC-123',
+          price: 320,
+          isVerified: true,
+        });
         setSelectedFare(320);
       },
     },
@@ -427,6 +490,10 @@ export default function App() {
     if (locationType === 'pickup') {
       setPickupLocation(location);
       setCurrentPickupLocation(location); // Update unified state
+      // If coming from rental screens, update rental location
+      if (locationSelectionSource === 'rental' || locationSelectionSource === 'rental-booking') {
+        setRentalPickupLocation(location);
+      }
       goBack();
     } else {
       setDropoffLocation(location);
@@ -461,13 +528,41 @@ export default function App() {
     navigateTo('driver-offers');
   };
 
-  const handleAcceptOffer = (driverId: string) => {
+  const handleAcceptOffer = (driverId: string, driverData?: {
+    id: string;
+    name: string;
+    photo: string;
+    rating: number;
+    totalTrips: number;
+    vehicleType: string;
+    vehicleModel: string;
+    vehicleColor: string;
+    vehiclePlate: string;
+    price: number;
+    isVerified: boolean;
+  }) => {
     console.log('Accepted offer from driver:', driverId);
     setSelectedDriverId(driverId);
-    // Set driver details based on driverId (in real app, this would come from API)
-    setSelectedDriverName('Muhammad Ali');
-    setSelectedDriverRating(4.9);
-    setSelectedFare(320);
+    if (driverData) {
+      setSelectedDriver(driverData);
+      setSelectedFare(driverData.price);
+    } else {
+      // Fallback for backward compatibility
+      setSelectedDriver({
+        id: driverId,
+        name: 'Muhammad Ali',
+        photo: '👨',
+        rating: 4.9,
+        totalTrips: 234,
+        vehicleType: 'Bike',
+        vehicleModel: 'Honda 125',
+        vehicleColor: 'Black',
+        vehiclePlate: 'ABC-123',
+        price: 320,
+        isVerified: true,
+      });
+      setSelectedFare(320);
+    }
     navigateTo('ride-tracking');
   };
 
@@ -484,7 +579,23 @@ export default function App() {
       navigateTo('home');
     } else if (tab === 'shops') {
       navigateTo('shops');
+    } else if (tab === 'rentals') {
+      navigateTo('rental');
     }
+  };
+
+  // Rental flow handlers
+  const handleRentalSelectPickupLocation = (location: string) => {
+    setRentalPickupLocation(location);
+    navigateTo('rental-booking');
+  };
+
+  const handleRentalConfirm = (hours: number, vehicleType: string, paymentMethod: string) => {
+    setRentalHours(hours);
+    setRentalVehicle(vehicleType);
+    setRentalPayment(paymentMethod);
+    // Navigate to searching drivers or confirmation screen
+    navigateTo('searching-drivers');
   };
 
   const handleDeliveryEnterPickupAddress = () => {
@@ -650,17 +761,69 @@ if (authStep === 'verify') {
     );
   }
 
+  // Rental flow screens
+  if (currentScreen === 'rental-booking') {
+    return (
+      <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
+        <RentalBookingScreen
+          onBack={goBack}
+          onConfirm={handleRentalConfirm}
+          pickupLocation={rentalPickupLocation}
+          onOpenLocationSelection={() => {
+            setLocationType('pickup');
+            setLocationSelectionSource('rental-booking');
+            navigateTo('location-selection');
+          }}
+        />
+        <BottomNav activeTab={activeBottomTab} onTabChange={handleBottomTabChange} />
+      </div>
+    );
+  }
+
+  if (currentScreen === 'rental') {
+    return (
+      <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
+        <RentalScreen
+          onBack={() => {
+            setActiveBottomTab('ride');
+            navigateTo('home');
+          }}
+          onSelectPickupLocation={handleRentalSelectPickupLocation}
+          pickupLocation={rentalPickupLocation}
+          onOpenLocationSelection={() => {
+            setLocationType('pickup');
+            setLocationSelectionSource('rental');
+            navigateTo('location-selection');
+          }}
+        />
+        <BottomNav activeTab={activeBottomTab} onTabChange={handleBottomTabChange} />
+      </div>
+    );
+  }
+
   if (currentScreen === 'ride-tracking') {
+    const currentDriver = selectedDriver || {
+      id: selectedDriverId || '1',
+      name: 'Muhammad Ali',
+      photo: '👨',
+      rating: 4.9,
+      totalTrips: 234,
+      vehicleType: 'Bike',
+      vehicleModel: 'Honda 125',
+      vehicleColor: 'Black',
+      vehiclePlate: 'ABC-123',
+      price: selectedFare,
+      isVerified: true,
+    };
+    
     return (
       <RideTrackingScreen
-        onBack={goBack}
         onCancelRide={handleCancelRide}
+        onOpenChat={() => navigateTo('live-chat')}
         pickupLocation={pickupLocation}
         dropoffLocation={dropoffLocation}
         fare={selectedFare}
-        driverName={selectedDriverName}
-        driverRating={selectedDriverRating}
-        vehicleDetails="🏍️ Honda 125 • Black • ABC-123"
+        driver={currentDriver}
       />
     );
   }
@@ -677,13 +840,19 @@ if (authStep === 'verify') {
   }
 
   if (currentScreen === 'searching-drivers') {
+    // Check if this is a rental flow
+    const isRentalFlow = Boolean(rentalPickupLocation && rentalHours > 0);
+    
     return (
       <SearchingDriversScreen
         onBack={goBack}
         onDriversFound={handleDriversFound}
-        pickupLocation={pickupLocation}
-        dropoffLocation={dropoffLocation}
-        vehicleType={selectedVehicle}
+        pickupLocation={isRentalFlow ? rentalPickupLocation : pickupLocation}
+        dropoffLocation={isRentalFlow ? undefined : dropoffLocation}
+        vehicleType={isRentalFlow ? rentalVehicle : selectedVehicle}
+        isRental={isRentalFlow}
+        rentalHours={isRentalFlow ? rentalHours : undefined}
+        rentalType="Hourly Rental"
       />
     );
   }
@@ -731,7 +900,22 @@ if (authStep === 'verify') {
   );
 }
 if (currentScreen === 'live-chat') {
-  return <LiveChatScreen onBack={goBack} />;
+  // If we have a selected driver (from ride-tracking), show driver chat
+  // Otherwise, show support chat
+  const driverForChat = selectedDriver ? {
+    id: selectedDriver.id,
+    name: selectedDriver.name,
+    photo: selectedDriver.photo,
+    rating: selectedDriver.rating,
+    totalTrips: selectedDriver.totalTrips,
+    vehicleType: selectedDriver.vehicleType,
+    vehicleModel: selectedDriver.vehicleModel,
+    vehicleColor: selectedDriver.vehicleColor,
+    vehiclePlate: selectedDriver.vehiclePlate,
+    isVerified: selectedDriver.isVerified,
+  } : undefined;
+  
+  return <LiveChatScreen onBack={goBack} driver={driverForChat} />;
 }
 if (currentScreen === 'call-Support') {
   return <CallSupportScreen onBack={goBack} />;
@@ -841,25 +1025,65 @@ if (currentScreen === 'call-Support') {
         <LanguageSelectionModal onClose={handleCloseLanguageModal} />
       )}
       
-      {/* Language Toggle Button - without extra English in Urdu mode */}
-      <button
-        onClick={() => setShowLanguageModal(true)}
-        className="absolute top-6 right-4 z-50 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 shadow-sm hover:bg-[#00D47C] hover:text-white hover:border-[#00D47C] transition-colors"
-      >
-        {language === 'en' ? 'اردو' : 'EN'}
-      </button>
+      {/* Top-right FAB Stack - All floating controls */}
+      <div className="absolute top-6 right-4 z-50 flex flex-col gap-3">
+        {/* Menu Button - Top */}
+        <button 
+          onClick={handleOpenHelpSupport}
+          className="rounded-full w-10 h-10 flex items-center justify-center border border-[#00D47C] shadow-sm bg-[#00D47C] text-white transition-colors"
+          aria-label={t('help.title', 'Help & Support')}
+        >
+          <Menu className="w-5 h-5 text-white" />
+        </button>
 
-      {/* Menu Button - stacked below language toggle on the right */}
-      <button 
-        onClick={handleOpenHelpSupport}
-        className="absolute top-20 right-4 z-40 bg-white/90 rounded-full w-10 h-10 flex items-center justify-center border border-gray-200 shadow-sm hover:bg-[#00D47C] hover:text-white hover:border-[#00D47C] transition-colors"
-        aria-label={t('help.title', 'Help & Support')}
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+        {/* Language Toggle Button */}
+        <button
+          onClick={() => setShowLanguageModal(true)}
+          className="rounded-full bg-[#00D47C] px-4 py-2 text-sm font-semibold text-white border border-[#00D47C] shadow-sm transition-colors"
+        >
+          {language === 'en' ? 'اردو' : 'EN'}
+        </button>
+
+        {/* Voice Announcements Toggle Button */}
+        {currentScreen === 'home' && (
+          <button
+            onClick={() => setVoiceAnnouncementsEnabled(!voiceAnnouncementsEnabled)}
+            className="rounded-full w-10 h-10 flex items-center justify-center border border-[#00D47C] shadow-sm bg-[#00D47C] text-white transition-colors"
+            aria-label={voiceAnnouncementsEnabled ? t('voice.disabled', 'Disable voice announcements') : t('voice.enabled', 'Enable voice announcements')}
+            title={voiceAnnouncementsEnabled ? t('voice.disabled', 'Voice announcements enabled') : t('voice.enabled', 'Voice announcements disabled')}
+          >
+            {voiceAnnouncementsEnabled ? (
+              <Volume2 className="w-5 h-5 text-white" />
+            ) : (
+              <VolumeX className="w-5 h-5 text-white" />
+            )}
+          </button>
+        )}
+
+        {/* Location / Locate-me Button - Bottom */}
+        {currentScreen === 'home' && (
+          <button
+            onClick={() => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
+                    // MapView will handle the location update via its internal state
+                  },
+                  () => {}
+                );
+              }
+            }}
+            className="rounded-full w-10 h-10 flex items-center justify-center border border-[#00D47C] shadow-sm bg-[#00D47C] text-white transition-colors"
+            aria-label={t('home.locateMe', 'Locate me')}
+          >
+            <MapPin className="w-5 h-5 text-white" />
+          </button>
+        )}
+      </div>
 
       {/* Map - home view, just show user + nearby vehicles */}
-      <MapView showRoute={false} />
+      <MapView showRoute={false} hideLocateButton={currentScreen === 'home'} />
 
       {/* User Menu Drawer */}
       <UserMenuDrawer

@@ -4,6 +4,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
 import { MapView } from './MapView';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface ShopInfo {
   id: number;
@@ -24,6 +25,7 @@ interface ShopsScreenProps {
 export function ShopsScreen({ onBack, onShopClick, onOrderClick }: ShopsScreenProps) {
   const { t } = useTranslation();
   const { isColorblindMode } = useAccessibility();
+  usePageAnnouncement(t('voice.shopsScreen', 'Shops Screen'));
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const categories = [
@@ -108,29 +110,24 @@ export function ShopsScreen({ onBack, onShopClick, onOrderClick }: ShopsScreenPr
   ];
 
   return (
-    <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
+    <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-white z-50 border-b border-gray-100">
+        <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-lg">
+          <ArrowLeft className="w-6 h-6 text-gray-600" />
+        </button>
+        <h1 className="text-xl text-black">Shops</h1>
+      </div>
+
       {/* Map Background */}
-      <div className="absolute inset-0 z-0">
+      <div className="flex-1 relative">
         <MapView showRoute={false} />
       </div>
 
-      {/* Back Button */}
-      <div className="absolute top-4 left-4 z-30">
-        <button
-          onClick={onBack}
-          className="bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-700" />
-        </button>
-      </div>
-
       {/* Main Content - White Card Overlay */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-3xl shadow-2xl" style={{ height: '70%' }}>
+      <div className="bg-white rounded-t-3xl shadow-2xl z-20 flex-shrink-0" style={{ height: '70%' }}>
         <div className="h-full overflow-y-auto pt-6 pb-32">
           <div className="px-4">
-            {/* Title */}
-            <h1 className="text-3xl font-bold text-blue-600 mb-4">Shops</h1>
-
             {/* Search Bar */}
             <div className="flex items-center gap-2 border-2 border-[#00D47C] rounded-2xl px-4 py-3 mb-6 bg-white">
               <Search className="w-5 h-5 text-gray-400" />

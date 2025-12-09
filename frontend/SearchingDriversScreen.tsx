@@ -1,12 +1,18 @@
 import { ArrowLeft, X } from './ui/icons';
 import { useState, useEffect } from 'react';
+import { useTranslation } from './i18n';
+import { usePageAnnouncement, useVoiceAnnouncements } from './useVoiceAnnouncements';
 
 interface SearchingDriversScreenProps {
   onBack: () => void;
   onDriversFound: () => void;
   pickupLocation: string;
-  dropoffLocation: string;
+  dropoffLocation?: string;
   vehicleType: string;
+  // Rental specific props
+  isRental?: boolean;
+  rentalHours?: number;
+  rentalType?: string;
 }
 
 export function SearchingDriversScreen({
@@ -15,7 +21,13 @@ export function SearchingDriversScreen({
   pickupLocation,
   dropoffLocation,
   vehicleType,
+  isRental = false,
+  rentalHours,
+  rentalType = 'Hourly Rental',
 }: SearchingDriversScreenProps) {
+  const { t } = useTranslation();
+  const { announceInfo } = useVoiceAnnouncements();
+  usePageAnnouncement(t('voice.searchingDrivers', 'Searching for drivers'), [pickupLocation, dropoffLocation]);
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {
@@ -25,6 +37,7 @@ export function SearchingDriversScreen({
 
     // Auto-navigate to offers screen after 5 seconds
     const timeout = setTimeout(() => {
+      announceInfo(t('voice.driversFound', 'Drivers found'));
       onDriversFound();
     }, 5000);
 
@@ -58,27 +71,39 @@ export function SearchingDriversScreen({
           <div className="flex items-start gap-3">
             <span className="text-lg">📍</span>
             <div>
-              <p className="text-xs text-gray-500">From</p>
+              <p className="text-xs text-gray-500">Pickup Location</p>
               <p className="text-sm text-black">{pickupLocation}</p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-lg">📍</span>
-            <div>
-              <p className="text-xs text-gray-500">To</p>
-              <p className="text-sm text-black">{dropoffLocation}</p>
+          {isRental ? (
+            <div className="flex items-start gap-3">
+              <span className="text-lg">⏰</span>
+              <div>
+                <p className="text-xs text-gray-500">Rental Type</p>
+                <p className="text-sm text-black">{rentalType} • {rentalHours} {rentalHours === 1 ? 'hour' : 'hours'}</p>
+              </div>
             </div>
-          </div>
-          <div className="pt-3 border-t border-gray-100 flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="text-base">🛣️</span>
-              <span className="text-sm text-gray-600">5.2 km</span>
+          ) : (
+            <div className="flex items-start gap-3">
+              <span className="text-lg">📍</span>
+              <div>
+                <p className="text-xs text-gray-500">To</p>
+                <p className="text-sm text-black">{dropoffLocation}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base">⏱️</span>
-              <span className="text-sm text-gray-600">~12 minutes</span>
+          )}
+          {!isRental && (
+            <div className="pt-3 border-t border-gray-100 flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-base">🛣️</span>
+                <span className="text-sm text-gray-600">5.2 km</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-base">⏱️</span>
+                <span className="text-sm text-gray-600">~12 minutes</span>
+              </div>
             </div>
-          </div>
+          )}
           <div className="bg-green-50 rounded-xl p-3 border border-green-200">
             <p className="text-sm text-green-800">
               <span>💰</span> Your budget: <span>Rs. 400-600</span>
@@ -144,7 +169,13 @@ export function SearchingDriversScreen({
 
             {/* Center Icon */}
             <div className="relative z-10 w-20 h-20 bg-[#00D47C] rounded-full flex items-center justify-center shadow-lg pulse-icon">
-              <span className="text-4xl">{vehicleType === 'bike' ? '🏍️' : vehicleType === 'rickshaw' ? '🛺' : vehicleType === 'car' ? '🚗' : '🚙'}</span>
+              <span className="text-4xl">
+                {vehicleType === 'bike' || vehicleType === 'motorcycle' ? '🏍️' 
+                : vehicleType === 'rickshaw' ? '🛺' 
+                : vehicleType === 'car' ? '🚗' 
+                : vehicleType === 'car-ac' ? '🚙' 
+                : '🚗'}
+              </span>
             </div>
           </div>
 

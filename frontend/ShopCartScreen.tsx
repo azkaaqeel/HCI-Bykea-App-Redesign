@@ -1,6 +1,7 @@
 import { ArrowLeft } from './ui/icons';
 import { ShopCartItem } from './types';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface ShopCartScreenProps {
   onBack: () => void;
@@ -24,6 +25,7 @@ export function ShopCartScreen({
   onRemoveItem,
 }: ShopCartScreenProps) {
   const { t } = useTranslation();
+  usePageAnnouncement(t('voice.shopCart', 'Shopping Cart'));
   const subtotal = cartItems.reduce((sum, item) => sum + item.priceValue * item.quantity, 0);
   const total = subtotal + deliveryFee;
 

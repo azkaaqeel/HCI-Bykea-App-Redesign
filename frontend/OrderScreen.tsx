@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, MapPin, Edit3, Mic, Banknote, X, Plus, ArrowRight } from './ui/icons';
 import { MapView } from './MapView';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface OrderScreenProps {
   onBack: () => void;
@@ -19,6 +20,7 @@ interface OrderScreenProps {
 
 export function OrderScreen({ onBack, shopName, dropAddress = '75270 KU Circular Rd University Of', onUpdateLocation, onOpenLocationSelection, onPlaceOrder }: OrderScreenProps) {
   const { t } = useTranslation();
+  usePageAnnouncement(t('voice.orderScreen', `Order from ${shopName || 'Shop'}`), [shopName]);
   const [purchaseValue, setPurchaseValue] = useState(1500);
   const [deliveryFare, setDeliveryFare] = useState(180);
   const [voiceNote, setVoiceNote] = useState('');

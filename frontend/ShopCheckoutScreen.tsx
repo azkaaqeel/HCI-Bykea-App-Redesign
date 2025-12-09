@@ -1,5 +1,6 @@
 import { ArrowLeft, MapPin, Info } from './ui/icons';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface ShopCheckoutScreenProps {
   onBack: () => void;
@@ -23,6 +24,7 @@ export function ShopCheckoutScreen({
   onTipChange,
 }: ShopCheckoutScreenProps) {
   const { t } = useTranslation();
+  usePageAnnouncement(t('voice.shopCheckout', 'Checkout'));
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden">
       <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-2 pb-1 bg-white shadow-sm">

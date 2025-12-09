@@ -1,6 +1,7 @@
 import { ArrowLeft, Package } from './ui/icons';
 import { useState } from 'react';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface ParcelDetailsScreenProps {
   onBack: () => void;
@@ -26,6 +27,7 @@ export function ParcelDetailsScreen({
   deliveryAddress,
 }: ParcelDetailsScreenProps) {
   const { t } = useTranslation();
+  usePageAnnouncement(t('voice.parcelDetails', 'Parcel Details'));
   const [weight, setWeight] = useState('');
   const [dimensions, setDimensions] = useState('');
   const [description, setDescription] = useState('');

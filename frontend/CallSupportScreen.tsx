@@ -1,10 +1,14 @@
 import { ArrowLeft, Phone } from './ui/icons';
+import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface CallSupportScreenProps {
   onBack: () => void;
 }
 
 export function CallSupportScreen({ onBack }: CallSupportScreenProps) {
+  const { t } = useTranslation();
+  usePageAnnouncement(t('voice.callSupport', 'Call Support'));
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white flex flex-col">
       {/* Header */}

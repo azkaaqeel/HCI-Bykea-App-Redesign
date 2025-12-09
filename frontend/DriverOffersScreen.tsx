@@ -1,10 +1,12 @@
-import { ArrowLeft, Star, Check, X, TrendingDown } from './ui/icons';
+import { ArrowLeft, Star, Check, X, TrendingDown, ChevronRight } from './ui/icons';
 import { useState, useEffect } from 'react';
 import { useAccessibility } from './accessibility';
+import { useTranslation } from './i18n';
+import { usePageAnnouncement, useVoiceAnnouncements } from './useVoiceAnnouncements';
 
 interface DriverOffersScreenProps {
   onBack: () => void;
-  onAcceptOffer: (driverId: string) => void;
+  onAcceptOffer: (driverId: string, driverData?: DriverOffer) => void;
   pickupLocation: string;
   dropoffLocation: string;
 }
@@ -86,10 +88,14 @@ export function DriverOffersScreen({
   pickupLocation,
   dropoffLocation,
 }: DriverOffersScreenProps) {
+  const { t } = useTranslation();
+  const { announceAction } = useVoiceAnnouncements();
   const { isColorblindMode } = useAccessibility();
+  usePageAnnouncement(t('voice.driverOffers', 'Driver Offers'), [pickupLocation, dropoffLocation]);
   const [selectedFilter, setSelectedFilter] = useState<'price' | 'rating' | 'pickup'>('price');
   const [expiryTimer, setExpiryTimer] = useState(225); // 3:45 in seconds
   const [rejectedOffers, setRejectedOffers] = useState<string[]>([]);
+  const [expandedOfferId, setExpandedOfferId] = useState<string | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -114,6 +120,13 @@ export function DriverOffersScreen({
 
   const handleReject = (offerId: string) => {
     setRejectedOffers([...rejectedOffers, offerId]);
+    if (expandedOfferId === offerId) {
+      setExpandedOfferId(null);
+    }
+  };
+
+  const toggleExpand = (offerId: string) => {
+    setExpandedOfferId(expandedOfferId === offerId ? null : offerId);
   };
 
   return (
@@ -180,158 +193,170 @@ export function DriverOffersScreen({
 
       {/* Driver Offers List */}
       <div data-tutorial="driver-offers" className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        <style>{`
-          @keyframes slideInUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          @keyframes pulse-opacity {
-            0%, 100% {
-              opacity: 0.5;
-            }
-            50% {
-              opacity: 1;
-            }
-          }
-          .slide-in-up {
-            animation: slideInUp 0.5s ease-out both;
-          }
-          .pulse-fade {
-            animation: pulse-opacity 2s ease-in-out infinite;
-          }
-        `}</style>
-        {sortedOffers.map((offer, index) => (
-          <div
-            key={offer.id}
-            className={`bg-white rounded-2xl shadow-sm p-4 slide-in-up ${
-              offer.isBestOffer ? 'border-2 border-[#00D47C]' : 'border border-gray-200'
-            }`}
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            {/* Best Offer Badge */}
-            {offer.isBestOffer && (
-              <div className="flex items-center gap-2 mb-3 bg-[#00D47C] -mx-4 -mt-4 px-4 py-2 rounded-t-2xl">
-                <Star className="w-4 h-4 text-white fill-white" />
-                <span className="text-white text-sm">BEST OFFER</span>
-              </div>
-            )}
-
-            {/* Driver Info */}
-            <div className="flex items-start gap-3 mb-3">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-2xl flex-shrink-0">
-                {offer.photo}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-black truncate">{offer.name}</h3>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm text-gray-700">{offer.rating}</span>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500">({offer.totalTrips} trips)</p>
-              </div>
-            </div>
-
-            {/* Vehicle Info */}
-            <div className="flex items-center gap-2 mb-3 bg-gray-50 rounded-xl p-3">
-              <span className="text-xl">🏍️</span>
-              <div className="flex-1">
-                <p className="text-sm text-gray-900">
-                  {offer.vehicleType} • {offer.vehicleModel}
-                </p>
-                <p className="text-xs text-gray-600">
-                  {offer.vehicleColor} • {offer.vehiclePlate}
-                </p>
-              </div>
-            </div>
-
-            {/* Price and Details */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-green-50 rounded-xl p-3 border border-green-200 relative">
-                {isColorblindMode && (
-                  <span className="absolute top-2 right-2 text-blue-600 font-bold text-xs">✓</span>
-                )}
-                <p className="text-xs text-green-700 mb-1">💰 Price</p>
-                <p className="text-xl text-green-900">Rs. {offer.price}</p>
-                {offer.priceLabel && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <TrendingDown className="w-3 h-3 text-green-600" />
-                    <p className="text-xs text-green-700">{offer.priceLabel}</p>
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <div className="bg-blue-50 rounded-xl p-2 border border-blue-200 relative">
-                  {isColorblindMode && (
-                    <span className="absolute top-1 right-1 text-purple-600 font-bold text-xs">ℹ</span>
-                  )}
-                  <p className="text-xs text-blue-900">
-                    ⏱️ Arrives in: <span>{offer.arrivalTime} min</span>
-                  </p>
-                </div>
-                <div className="bg-purple-50 rounded-xl p-2 border border-purple-200 relative" style={{ backgroundImage: isColorblindMode ? 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px)' : undefined }}>
-                  {isColorblindMode && (
-                    <span className="absolute top-1 right-1 text-purple-600 font-bold text-xs">📍</span>
-                  )}
-                  <p className="text-xs text-purple-900">
-                    📍 {offer.distance} away
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Badges */}
-            {offer.isVerified && (
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center gap-1 bg-blue-100 px-3 py-1 rounded-full">
-                  <Check className="w-3 h-3 text-blue-700" />
-                  <span className="text-xs text-blue-700">Verified Driver</span>
-                </div>
-              </div>
-            )}
-
-            {/* Driver Message */}
-            {offer.message && (
-              <div className="bg-gray-50 rounded-xl p-3 mb-3 border-l-4 border-[#00D47C]">
-                <p className="text-sm text-gray-700">
-                  💬 "{offer.message}"
-                </p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={() => onAcceptOffer(offer.id)}
-                className="flex-1 bg-[#00D47C] text-white py-3 rounded-xl hover:bg-[#00bd6e] transition-colors"
-              >
-                {offer.isBestOffer ? 'ACCEPT OFFER' : 'ACCEPT'}
-              </button>
-              {!offer.isBestOffer && (
+        {sortedOffers.map((offer) => {
+          const isExpanded = expandedOfferId === offer.id;
+          const driverInitial = offer.name.charAt(0).toUpperCase();
+          
+          return (
+            <div
+              key={offer.id}
+              className={`bg-white rounded-xl border transition-all duration-200 ${
+                isExpanded 
+                  ? 'border-[#00D47C] shadow-md' 
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              style={{ minHeight: isExpanded ? 'auto' : '110px', maxHeight: isExpanded ? 'none' : '130px' }}
+            >
+              {/* Compact Horizontal Card */}
+              {!isExpanded && (
                 <button
-                  onClick={() => handleReject(offer.id)}
-                  className="px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={() => toggleExpand(offer.id)}
+                  className="relative w-full p-3 text-left hover:bg-gray-50 transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  {/* Best Offer Badge - Small and Subtle */}
+                  {offer.isBestOffer && (
+                    <div className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-medium px-2 py-0.5 rounded">
+                      BEST OFFER
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    {/* Left: Avatar + Driver Name */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-semibold text-sm">{driverInitial}</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{offer.name}</p>
+                      </div>
+                    </div>
+
+                    {/* Center: Rating + Trips + Vehicle */}
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5">
+                        <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                        <span className="text-xs font-medium text-gray-900">{offer.rating}</span>
+                        <span className="text-xs text-gray-500">({offer.totalTrips})</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1 bg-gray-100 px-1.5 py-0.5 rounded">
+                          <span className="text-xs">🏍️</span>
+                          <span className="text-xs text-gray-700">{offer.vehicleType}</span>
+                        </div>
+                        <div className="flex items-center gap-1 bg-gray-100 px-1.5 py-0.5 rounded">
+                          <span className="text-xs text-gray-500">{offer.vehiclePlate}</span>
+                        </div>
+                        {offer.isVerified && (
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: Price + ETA + Distance + Actions */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-[#00D47C]">{offer.price} Rs.</p>
+                        <p className="text-[10px] text-gray-500">Total fare</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10px] text-gray-600">⏱️ {offer.arrivalTime} min</span>
+                          <span className="text-[10px] text-gray-600">📍 {offer.distance}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            announceAction(t('voice.driverAccepted', `Driver ${offer.name} accepted. Price: Rs. ${offer.price}`));
+                            onAcceptOffer(offer.id, offer);
+                          }}
+                          className="px-2.5 py-1 bg-[#00D47C] text-white text-[10px] font-medium rounded hover:bg-[#00bd6e] transition-colors whitespace-nowrap"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReject(offer.id);
+                          }}
+                          className="px-2.5 py-1 border border-red-300 text-red-600 text-[10px] font-medium rounded hover:bg-red-50 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </button>
               )}
-              <button className="px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors">
-                View Details
-              </button>
+
+              {/* Expanded View - Optional for more details */}
+              {isExpanded && (
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 font-semibold">{driverInitial}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-900">{offer.name}</h3>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                          <span className="text-xs text-gray-700">{offer.rating} ({offer.totalTrips} trips)</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleExpand(offer.id)}
+                      className="p-1 hover:bg-gray-100 rounded-full"
+                    >
+                      <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-2">
+                    <p className="text-xs text-gray-900">
+                      <span className="text-sm">🏍️</span> {offer.vehicleType} • {offer.vehicleModel} • {offer.vehicleColor} • {offer.vehiclePlate}
+                    </p>
+                  </div>
+
+                  {offer.message && (
+                    <div className="bg-gray-50 rounded-lg p-2 border-l-2 border-[#00D47C]">
+                      <p className="text-xs text-gray-700">💬 "{offer.message}"</p>
+                    </div>
+                  )}
+
+                  {offer.isVerified && (
+                    <div className="flex items-center gap-1">
+                      <Check className="w-3 h-3 text-blue-600" />
+                      <span className="text-xs text-blue-700">Verified Driver</span>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        announceAction(t('voice.driverAccepted', `Driver ${offer.name} accepted. Price: Rs. ${offer.price}`));
+                        onAcceptOffer(offer.id, offer);
+                      }}
+                      className="flex-1 bg-[#00D47C] text-white py-2 rounded-lg hover:bg-[#00bd6e] transition-colors text-sm font-semibold"
+                    >
+                      Accept Offer
+                    </button>
+                    <button
+                      onClick={() => handleReject(offer.id)}
+                      className="px-4 py-2 border border-red-300 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* More Offers Coming */}
-        <div className="bg-white rounded-xl p-4 border border-dashed border-gray-300 pulse-fade">
-          <p className="text-center text-gray-500">💡 More offers coming in...</p>
+        <div className="bg-white rounded-xl p-3 border border-dashed border-gray-300 mt-2">
+          <p className="text-center text-gray-500 text-xs">💡 More offers coming in...</p>
         </div>
       </div>
 

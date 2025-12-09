@@ -1,5 +1,7 @@
 import { Check, MapPin, User, Phone } from './ui/icons';
 import { MapView } from './MapView';
+import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface OrderPlacedScreenProps {
   onDone: () => void;
@@ -18,6 +20,8 @@ export function OrderPlacedScreen({
   driverName,
   estimatedTime,
 }: OrderPlacedScreenProps) {
+  const { t } = useTranslation();
+  usePageAnnouncement(t('voice.orderPlaced', `Order placed. Tracking ID: ${trackingId}`), [trackingId]);
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white overflow-hidden flex flex-col">
       {/* Map Background */}

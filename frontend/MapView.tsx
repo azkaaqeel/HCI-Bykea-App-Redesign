@@ -44,6 +44,7 @@ type MapViewProps = {
   onLocateRequest?: () => void;
   showCurrentLocationPin?: boolean;
   currentLocationPin?: LatLngTuple | null;
+  hideLocateButton?: boolean;
 };
 
 export function MapView({
@@ -55,6 +56,7 @@ export function MapView({
   onLocateRequest,
   showCurrentLocationPin = false,
   currentLocationPin = null,
+  hideLocateButton = false,
 }: MapViewProps) {
   const { t } = useTranslation();
   const [userPosition, setUserPosition] = useState<LatLngTuple>(KARACHI_CENTER);
@@ -259,20 +261,22 @@ export function MapView({
         )}
       </MapContainer>
 
-      <button
-        aria-label={t('home.locateMe')}
-        onClick={handleLocateMe}
-        className="absolute top-32 right-4 lg:right-6 z-[1000] rounded-full w-10 h-10 flex items-center justify-center bg-white/90 text-gray-700 border border-gray-200 shadow-sm hover:bg-[#00D47C] hover:text-white hover:border-[#00D47C] transition-colors"
-      >
-        <svg
-          className="w-5 h-5"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
+      {!hideLocateButton && (
+        <button
+          aria-label={t('home.locateMe')}
+          onClick={handleLocateMe}
+          className="absolute top-40 right-4 lg:right-6 z-[1000] rounded-full w-10 h-10 flex items-center justify-center bg-[#00D47C] text-white border border-[#00D47C] shadow-sm transition-colors"
         >
-          <path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
-        </svg>
-      </button>
+          <svg
+            className="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

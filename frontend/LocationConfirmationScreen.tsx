@@ -2,6 +2,7 @@ import { ArrowLeft, MapPin, Building, Edit3 } from './ui/icons';
 import { useState } from 'react';
 import { MapView } from './MapView';
 import { useTranslation } from './i18n';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface LocationConfirmationScreenProps {
   onBack: () => void;
@@ -21,6 +22,7 @@ export function LocationConfirmationScreen({
   landmarkDistance,
 }: LocationConfirmationScreenProps) {
   const { t } = useTranslation();
+  usePageAnnouncement(t('voice.locationConfirmation', 'Confirm Location'), [address]);
   const [instructions, setInstructions] = useState('');
 
   const handleConfirm = () => {

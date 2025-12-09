@@ -10,6 +10,8 @@ interface AccessibilityContextValue {
   setColorblindType: (type: ColorblindType) => void;
   isColorblindMode: boolean;
   isHighContrast: boolean;
+  voiceAnnouncementsEnabled: boolean;
+  setVoiceAnnouncementsEnabled: (enabled: boolean) => void;
 }
 
 const AccessibilityContext = createContext<AccessibilityContextValue | null>(null);
@@ -35,10 +37,19 @@ export function AccessibilityProvider({ children }: ProviderProps) {
     return (stored as ColorblindType) || 'general';
   });
 
+  const [voiceAnnouncementsEnabled, setVoiceAnnouncementsEnabled] = useState<boolean>(() => {
+    if (typeof window === 'undefined') {
+      return true; // Default to enabled
+    }
+    const stored = window.localStorage.getItem('hci-voice-announcements-enabled');
+    return stored !== null ? stored === 'true' : true; // Default to enabled
+  });
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('hci-accessibility-mode', mode);
       window.localStorage.setItem('hci-colorblind-type', colorblindType);
+      window.localStorage.setItem('hci-voice-announcements-enabled', String(voiceAnnouncementsEnabled));
       
       // Apply CSS classes to root element
       document.documentElement.classList.remove(
@@ -97,7 +108,7 @@ export function AccessibilityProvider({ children }: ProviderProps) {
         document.documentElement.classList.add('high-contrast-mode');
       }
     }
-  }, [mode, colorblindType]);
+  }, [mode, colorblindType, voiceAnnouncementsEnabled]);
 
   const value = useMemo<AccessibilityContextValue>(() => {
     return {
@@ -107,8 +118,10 @@ export function AccessibilityProvider({ children }: ProviderProps) {
       setColorblindType,
       isColorblindMode: mode === 'colorblind',
       isHighContrast: mode === 'high-contrast',
+      voiceAnnouncementsEnabled,
+      setVoiceAnnouncementsEnabled,
     };
-  }, [mode, colorblindType]);
+  }, [mode, colorblindType, voiceAnnouncementsEnabled]);
 
   return (
     <AccessibilityContext.Provider value={value}>

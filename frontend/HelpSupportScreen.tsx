@@ -2,6 +2,7 @@ import { ArrowLeft, Search, Phone, MessageCircle, Book, Mail, Globe, ChevronRigh
 import { useState } from 'react';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
+import { usePageAnnouncement } from './useVoiceAnnouncements';
 
 interface HelpSupportScreenProps {
   onBack: () => void;
@@ -24,7 +25,8 @@ export function HelpSupportScreen({
 }: HelpSupportScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const { language, setLanguage, t } = useTranslation();
-  const { mode, setMode, colorblindType, setColorblindType, isColorblindMode, isHighContrast } = useAccessibility();
+  usePageAnnouncement(t('help.title', 'Help & Support'));
+  const { mode, setMode, colorblindType, setColorblindType, isColorblindMode, isHighContrast, voiceAnnouncementsEnabled, setVoiceAnnouncementsEnabled } = useAccessibility();
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const [showAccessibilitySelector, setShowAccessibilitySelector] = useState(false);
   const [showColorblindTypeSelector, setShowColorblindTypeSelector] = useState(false);
@@ -379,6 +381,39 @@ export function HelpSupportScreen({
                     </div>
                   )}
                 </button>
+
+                {/* Voice Announcements Toggle */}
+                <div className="border-t border-gray-200 pt-3 mt-3">
+                  <button
+                    onClick={() => setVoiceAnnouncementsEnabled(!voiceAnnouncementsEnabled)}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
+                      voiceAnnouncementsEnabled
+                        ? 'border-[#00D47C] bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">🔊</span>
+                      <div className="text-left flex-1">
+                        <span className="text-gray-900 font-medium block">
+                          {t('help.accessibility.voiceAnnouncements', 'Voice Announcements')}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {voiceAnnouncementsEnabled 
+                            ? t('help.accessibility.voiceEnabled', 'Enabled - Screen reader and speech announcements active')
+                            : t('help.accessibility.voiceDisabled', 'Disabled - No voice announcements')}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-colors ${
+                      voiceAnnouncementsEnabled ? 'bg-[#00D47C]' : 'bg-gray-300'
+                    }`}>
+                      <div className={`w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+                        voiceAnnouncementsEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                      } mt-0.5`}></div>
+                    </div>
+                  </button>
+                </div>
               </div>
             )}
           </div>
