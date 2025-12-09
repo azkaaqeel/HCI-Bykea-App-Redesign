@@ -149,6 +149,35 @@ export function HelpSupportScreen({
           </div>
         </div>
 
+        {/* FAQs Section */}
+        <div className="px-4 py-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Book className="w-5 h-5 text-gray-600" />
+            <h2 className="text-gray-900">{t('help.faqs', 'Frequently Asked Questions')}</h2>
+          </div>
+          
+          <div className="bg-gray-50 rounded-2xl overflow-hidden">
+            {[
+              { q: 'help.faq.howToBook', a: 'help.faq.howToBook.answer' },
+              { q: 'help.faq.payment', a: 'help.faq.payment.answer' },
+              { q: 'help.faq.cancel', a: 'help.faq.cancel.answer' },
+              { q: 'help.faq.safety', a: 'help.faq.safety.answer' },
+              { q: 'help.faq.delivery', a: 'help.faq.delivery.answer' },
+              { q: 'help.faq.refund', a: 'help.faq.refund.answer' },
+            ].map((faq, index) => (
+              <details key={index} className="border-b border-gray-100 last:border-b-0">
+                <summary className="w-full flex items-center justify-between p-4 hover:bg-white transition-colors cursor-pointer list-none">
+                  <span className="text-gray-900 font-medium text-sm pr-4">{t(faq.q)}</span>
+                  <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform open:rotate-90" />
+                </summary>
+                <div className="px-4 pb-4 text-sm text-gray-600 leading-relaxed">
+                  {t(faq.a)}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
         {/* Email Support */}
         <div className="px-4 pb-3">
           <button className="w-full bg-white border border-gray-200 rounded-2xl p-5 hover:bg-gray-50 transition-colors">

@@ -30,6 +30,10 @@ import { LiveChatScreen } from './LiveChatScreen';
 import { CallSupportScreen } from './CallSupportScreen';
 import { RentalScreen } from './RentalScreen';
 import { RentalBookingScreen } from './RentalBookingScreen';
+import { HistoryScreen } from './HistoryScreen';
+import { WalletScreen } from './WalletScreen';
+import { NotificationsScreen } from './NotificationsScreen';
+import { SettingsScreen } from './SettingsScreen';
 import { useTutorial } from './TutorialProvider';
 import { TutorialStep } from './TutorialOverlay';
 import { usePageAnnouncement } from './useVoiceAnnouncements';
@@ -58,7 +62,11 @@ type ScreenType =
   | 'order'
   | 'call-Support'
   | 'rental'
-  | 'rental-booking';
+  | 'rental-booking'
+  | 'history'
+  | 'wallet'
+  | 'notifications'
+  | 'settings';
 
 export default function App() {
   const { language, toggleLanguage, t } = useTranslation();
@@ -921,6 +929,22 @@ if (currentScreen === 'call-Support') {
   return <CallSupportScreen onBack={goBack} />;
 }
 
+if (currentScreen === 'history') {
+  return <HistoryScreen onBack={goBack} />;
+}
+
+if (currentScreen === 'wallet') {
+  return <WalletScreen onBack={goBack} />;
+}
+
+if (currentScreen === 'notifications') {
+  return <NotificationsScreen onBack={goBack} />;
+}
+
+if (currentScreen === 'settings') {
+  return <SettingsScreen onBack={goBack} />;
+}
+
 
 
 
@@ -1090,11 +1114,14 @@ if (currentScreen === 'call-Support') {
   open={isUserMenuOpen}
   onOpenChange={setIsUserMenuOpen}
   onHelpSupport={() => {
-    // close the side menu
     setIsUserMenuOpen(false);
-    // navigate to the Help & Support screen
     navigateTo('help-support');
   }}
+  onHistory={() => navigateTo('history')}
+  onWallet={() => navigateTo('wallet')}
+  onNotifications={() => navigateTo('notifications')}
+  onCallBykea={() => navigateTo('call-Support')}
+  onSettings={() => navigateTo('settings')}
 />
 
       {/* Promo Banner and Location Card Container */}

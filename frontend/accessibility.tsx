@@ -72,38 +72,6 @@ export function AccessibilityProvider({ children }: ProviderProps) {
         Object.entries(cssVars).forEach(([key, value]) => {
           document.documentElement.style.setProperty(key, value);
         });
-        
-        // Force update elements with inline styles
-        const updateColorElements = () => {
-          // Update elements with brand green color
-          const greenElements = document.querySelectorAll(
-            '[class*="green"], [class*="00D47C"], [style*="#00D47C"], [style*="rgb(0, 212, 124)"]'
-          );
-          
-          const replacementColor = cssVars['--color-success'];
-          
-          greenElements.forEach((el) => {
-            const htmlEl = el as HTMLElement;
-            if (htmlEl.style) {
-              const computed = window.getComputedStyle(htmlEl);
-              if (computed.backgroundColor.includes('rgb(0, 212') || 
-                  computed.backgroundColor.includes('#00D47C') ||
-                  computed.backgroundColor.includes('#00be6f')) {
-                htmlEl.style.setProperty('background-color', replacementColor, 'important');
-              }
-              if (computed.color.includes('rgb(0, 212') || 
-                  computed.color.includes('#00D47C') ||
-                  computed.color.includes('#00be6f')) {
-                htmlEl.style.setProperty('color', cssVars['--color-success-dark'], 'important');
-              }
-            }
-          });
-        };
-        
-        // Run immediately and after delays to catch dynamically rendered elements
-        setTimeout(updateColorElements, 100);
-        setTimeout(updateColorElements, 500);
-        setTimeout(updateColorElements, 1000);
       } else if (mode === 'high-contrast') {
         document.documentElement.classList.add('high-contrast-mode');
       }

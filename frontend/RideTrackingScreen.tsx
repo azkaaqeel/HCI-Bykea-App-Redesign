@@ -68,17 +68,17 @@ export function RideTrackingScreen({
   useEffect(() => {
     if (rideState === 'arriving') {
       // Update arrival time and distance
-      const interval = setInterval(() => {
-        setDistance((prev) => {
-          const newDistance = prev - 15;
-          return newDistance > 50 ? newDistance : 50;
-        });
-        
-        setArrivalTime((prev) => {
-          const newTime = prev - 0.1;
-          return newTime > 0.5 ? newTime : 0.5;
-        });
-      }, 3000);
+    const interval = setInterval(() => {
+      setDistance((prev) => {
+        const newDistance = prev - 15;
+        return newDistance > 50 ? newDistance : 50;
+      });
+      
+      setArrivalTime((prev) => {
+        const newTime = prev - 0.1;
+        return newTime > 0.5 ? newTime : 0.5;
+      });
+    }, 3000);
 
       // Transition to "driver here" after 10-20 seconds (faster for testing)
       const timer = setTimeout(() => {
@@ -171,9 +171,9 @@ export function RideTrackingScreen({
       {/* ETA Overlay (top-right) */}
       {rideState === 'arriving' && (
         <div className="absolute top-6 right-4 z-40 bg-[#00D47C] rounded-2xl px-4 py-3 shadow-lg">
-          <div className="text-white text-xs">Arriving in</div>
+        <div className="text-white text-xs">Arriving in</div>
           <div className="text-white text-xl font-bold">{arrivalTime.toFixed(1)} min</div>
-        </div>
+      </div>
       )}
 
       {/* Full Screen Map */}
@@ -232,10 +232,10 @@ export function RideTrackingScreen({
               </div>
               {driver.isVerified && (
                 <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
+                </svg>
+              </div>
               )}
             </div>
 
@@ -254,17 +254,17 @@ export function RideTrackingScreen({
               {rideState === 'arriving' && (
                 <div className="bg-blue-50 rounded-lg px-2 py-1 text-xs text-blue-800">
                   Arriving in {arrivalTime.toFixed(1)} min • {distance}m away
-                </div>
+              </div>
               )}
               {rideState === 'driver-here' && (
                 <div className="bg-green-50 rounded-lg px-2 py-1 text-xs text-green-800">
                   Driver is here
-                </div>
+            </div>
               )}
               {rideState === 'ride-in-progress' && (
                 <div className="bg-purple-50 rounded-lg px-2 py-1 text-xs text-purple-800">
                   Ride in progress
-                </div>
+              </div>
               )}
             </div>
           </div>
@@ -297,14 +297,14 @@ export function RideTrackingScreen({
           {/* Ride State Actions */}
           {rideState === 'driver-here' && (
             <div className="pt-3">
-              <button
+            <button
                 onClick={handleStartRide}
                 className="w-full bg-[#00D47C] text-white py-3 rounded-xl font-semibold hover:bg-[#00bd6e] transition-colors"
               >
                 Start Ride
-              </button>
-            </div>
-          )}
+            </button>
+              </div>
+            )}
 
           {/* Cancel Ride Link */}
           {rideState !== 'ride-completed' && (
@@ -335,18 +335,18 @@ export function RideTrackingScreen({
                             : 'text-gray-300'
                         }`}
                       />
-                    </button>
+            </button>
                   ))}
+                  </div>
                 </div>
-              </div>
-              <button
+                <button
                 onClick={handleSubmitRating}
                 className="w-full bg-[#00D47C] text-white py-3 rounded-xl font-semibold hover:bg-[#00bd6e] transition-colors"
               >
                 Submit Rating
-              </button>
-            </div>
-          )}
+                </button>
+              </div>
+            )}
         </div>
 
         {/* Home Indicator */}

@@ -12,11 +12,11 @@ export function CallSupportScreen({ onBack }: CallSupportScreenProps) {
   return (
     <div className="relative h-screen w-full max-w-md mx-auto bg-white flex flex-col">
       {/* Header */}
-      <header className="bg-[#00A859] px-4 pt-4 pb-3 flex items-center gap-3">
+      <header className="bg-[#00D47C] px-4 pt-4 pb-3 flex items-center gap-3">
         <button onClick={onBack} className="p-2 -ml-2">
           <ArrowLeft className="w-6 h-6 text-white" />
         </button>
-        <h1 className="text-white font-semibold text-base">Call Bykea</h1>
+        <h1 className="text-white font-semibold text-lg">{t('call.title', 'Call Bykea')}</h1>
       </header>
 
       {/* Content */}
@@ -29,17 +29,16 @@ export function CallSupportScreen({ onBack }: CallSupportScreenProps) {
         </div>
 
         <h2 className="text-xl font-semibold mb-3">
-          Call Bykea Representative
+          {t('call.heading', 'Call Bykea Representative')}
         </h2>
         <p className="text-sm text-gray-600 max-w-xs mb-8">
-          Speak directly with a Bykea representative to place your order via
-          phone. No need to navigate through the app—just call and order!
+          {t('call.description', 'Speak directly with a Bykea representative to place your order via phone.')}
         </p>
 
         {/* Number card */}
         <div className="w-full bg-gray-50 rounded-2xl py-4 mb-6">
-          <p className="text-xs text-gray-500 mb-1">Call us at</p>
-          <p className="text-lg font-semibold text-[#00A859]">
+          <p className="text-xs text-gray-500 mb-1">{t('call.callUs', 'Call us at')}</p>
+          <p className="text-lg font-semibold text-[#00D47C]">
             +92 300 123 4567
           </p>
         </div>
@@ -47,18 +46,18 @@ export function CallSupportScreen({ onBack }: CallSupportScreenProps) {
         {/* Call button */}
         <button
           onClick={() => {
-            alert('Calling +92 300 123 4567…');
+            alert(t('call.calling', 'Calling +92 300 123 4567…'));
             // real device:
             // window.location.href = 'tel:+923001234567';
           }}
-          className="w-full py-4 rounded-2xl bg-[#00A859] text-white font-semibold flex items-center justify-center gap-2 shadow-md active:scale-95 transition"
+          className="w-full py-4 rounded-2xl bg-[#00D47C] hover:bg-[#00be6f] text-white font-semibold flex items-center justify-center gap-2 shadow-md active:scale-95 transition"
         >
           <Phone className="w-5 h-5 text-white" />
-          <span>Call Now</span>
+          <span>{t('call.callNow', 'Call Now')}</span>
         </button>
 
         <p className="mt-4 text-xs text-gray-500">
-          Available 24/7 for your convenience
+          {t('call.available', 'Available 24/7 for your convenience')}
         </p>
       </main>
 

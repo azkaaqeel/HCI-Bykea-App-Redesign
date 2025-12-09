@@ -96,9 +96,20 @@ export function TutorialOverlay({
             break;
         }
 
-        // Keep popup within viewport
-        top = Math.max(20, Math.min(top, window.innerHeight - popupHeight - 20));
-        left = Math.max(20, Math.min(left, window.innerWidth - popupWidth - 20));
+        // Keep popup within mobile frame (max-w-md = 448px typically)
+        // Find the mobile container
+        const mobileContainer = document.querySelector('.max-w-md, [class*="max-w-md"]') as HTMLElement;
+        const containerRect = mobileContainer?.getBoundingClientRect() || { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+        
+        // Calculate bounds within mobile container
+        const minTop = containerRect.top + 20;
+        const maxTop = containerRect.top + containerRect.height - popupHeight - 20;
+        const minLeft = containerRect.left + 20;
+        const maxLeft = containerRect.left + containerRect.width - popupWidth - 20;
+        
+        // Keep popup within mobile frame bounds
+        top = Math.max(minTop, Math.min(top, maxTop));
+        left = Math.max(minLeft, Math.min(left, maxLeft));
 
         setPosition({ top, left, arrow });
 
@@ -116,10 +127,16 @@ export function TutorialOverlay({
           }
         };
       } else {
-        // Center if no target
+        // Center if no target - within mobile frame
+        const mobileContainer = document.querySelector('.max-w-md, [class*="max-w-md"]') as HTMLElement;
+        const containerRect = mobileContainer?.getBoundingClientRect() || { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+        
+        const centerTop = containerRect.top + containerRect.height / 2 - 200;
+        const centerLeft = containerRect.left + containerRect.width / 2 - 300;
+        
         setPosition({
-          top: window.innerHeight / 2 - 200,
-          left: window.innerWidth / 2 - 300,
+          top: Math.max(containerRect.top + 20, Math.min(centerTop, containerRect.top + containerRect.height - 420)),
+          left: Math.max(containerRect.left + 20, Math.min(centerLeft, containerRect.left + containerRect.width - 620)),
           arrow: 'bottom',
         });
       }

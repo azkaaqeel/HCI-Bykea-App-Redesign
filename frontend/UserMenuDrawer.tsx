@@ -1,7 +1,7 @@
 import { Sheet, SheetContent } from './ui/sheet';
 import { useTranslation } from './i18n';
 import { useAccessibility } from './accessibility';
-import { Phone, Globe, Info, Filter, Clock, Wallet, Bell, ChevronRight, Eye } from './ui/icons';
+import { Phone, Globe, Info, Filter, Clock, Wallet, Bell, ChevronRight, Eye, Settings } from './ui/icons';
 import { ColorblindType } from './colorTransformations';
 import { useState } from 'react';
 
@@ -9,12 +9,18 @@ interface UserMenuDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onHelpSupport: () => void;
+  onHistory?: () => void;
+  onWallet?: () => void;
+  onNotifications?: () => void;
+  onCallBykea?: () => void;
+  onSettings?: () => void;
 }
 
-export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDrawerProps) {
+export function UserMenuDrawer({ open, onOpenChange, onHelpSupport, onHistory, onWallet, onNotifications, onCallBykea, onSettings }: UserMenuDrawerProps) {
   const { t, language, setLanguage } = useTranslation();
   const { mode, setMode, colorblindType, setColorblindType, voiceAnnouncementsEnabled, setVoiceAnnouncementsEnabled } = useAccessibility();
   const [showAccessibilityOptions, setShowAccessibilityOptions] = useState(false);
+  const [showColorblindTypes, setShowColorblindTypes] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -32,10 +38,10 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
 
         {/* Menu items */}
         <div className="px-6 py-4 space-y-1 text-sm">
-          <MenuItem icon={Wallet} label="My Wallet" />
-          <MenuItem icon={Clock} label="History" />
-          <MenuItem icon={Bell} label="Notifications" />
-          <MenuItem icon={Phone} label="Call Bykea" />
+          <MenuItem icon={Wallet} label="My Wallet" onClick={() => { onOpenChange(false); onWallet?.(); }} />
+          <MenuItem icon={Clock} label="History" onClick={() => { onOpenChange(false); onHistory?.(); }} />
+          <MenuItem icon={Bell} label="Notifications" onClick={() => { onOpenChange(false); onNotifications?.(); }} />
+          <MenuItem icon={Phone} label="Call Bykea" onClick={() => { onOpenChange(false); onCallBykea?.(); }} />
           <button
             className="w-full flex items-center justify-between py-3"
             onClick={() => setLanguage(language === 'en' ? 'ur' : 'en')}
@@ -74,6 +80,7 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
                 onClick={() => {
                   setMode('normal');
                   setShowAccessibilityOptions(false);
+                  setShowColorblindTypes(false);
                 }}
                 className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
                   mode === 'normal'
@@ -95,8 +102,13 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
               {/* Colorblind Mode */}
               <button
                 onClick={() => {
-                  setMode('colorblind');
-                  setShowAccessibilityOptions(false);
+                  if (mode === 'colorblind') {
+                    // If already in colorblind mode, toggle the dropdown
+                    setShowColorblindTypes(!showColorblindTypes);
+                  } else {
+                    // If not in colorblind mode, show the dropdown to select type
+                    setShowColorblindTypes(true);
+                  }
                 }}
                 className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
                   mode === 'colorblind'
@@ -108,63 +120,77 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
                   <span className="text-lg">🎨</span>
                   <span>{t('help.accessibility.colorblind', 'Colorblind Mode')}</span>
                 </div>
-                {mode === 'colorblind' && (
-                  <ChevronRight className="w-4 h-4" />
-                )}
+                <ChevronRight className={`w-4 h-4 transition-transform ${showColorblindTypes ? 'rotate-90' : ''}`} />
               </button>
 
-              {/* Colorblind Type Selector (shown when colorblind mode is active) */}
-              {mode === 'colorblind' && (
+              {/* Colorblind Type Selector (shown when dropdown is open) */}
+              {showColorblindTypes && (
                 <div className="ml-4 mt-1 space-y-1 border-l-2 border-[#00D47C] pl-3">
                   <button
-                    onClick={() => setColorblindType('general')}
+                    onClick={() => {
+                      setMode('colorblind');
+                      setColorblindType('general');
+                      setShowColorblindTypes(false);
+                    }}
                     className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
-                      colorblindType === 'general'
+                      mode === 'colorblind' && colorblindType === 'general'
                         ? 'text-[#00D47C] font-semibold'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
                     <span>General</span>
-                    {colorblindType === 'general' && (
+                    {mode === 'colorblind' && colorblindType === 'general' && (
                       <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
                     )}
                   </button>
                   <button
-                    onClick={() => setColorblindType('protanopia')}
+                    onClick={() => {
+                      setMode('colorblind');
+                      setColorblindType('protanopia');
+                      setShowColorblindTypes(false);
+                    }}
                     className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
-                      colorblindType === 'protanopia'
+                      mode === 'colorblind' && colorblindType === 'protanopia'
                         ? 'text-[#00D47C] font-semibold'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
                     <span>Protanopia</span>
-                    {colorblindType === 'protanopia' && (
+                    {mode === 'colorblind' && colorblindType === 'protanopia' && (
                       <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
                     )}
                   </button>
                   <button
-                    onClick={() => setColorblindType('deuteranopia')}
+                    onClick={() => {
+                      setMode('colorblind');
+                      setColorblindType('deuteranopia');
+                      setShowColorblindTypes(false);
+                    }}
                     className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
-                      colorblindType === 'deuteranopia'
+                      mode === 'colorblind' && colorblindType === 'deuteranopia'
                         ? 'text-[#00D47C] font-semibold'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
                     <span>Deuteranopia</span>
-                    {colorblindType === 'deuteranopia' && (
+                    {mode === 'colorblind' && colorblindType === 'deuteranopia' && (
                       <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
                     )}
                   </button>
                   <button
-                    onClick={() => setColorblindType('tritanopia')}
+                    onClick={() => {
+                      setMode('colorblind');
+                      setColorblindType('tritanopia');
+                      setShowColorblindTypes(false);
+                    }}
                     className={`w-full flex items-center justify-between p-2 rounded transition-all text-xs ${
-                      colorblindType === 'tritanopia'
+                      mode === 'colorblind' && colorblindType === 'tritanopia'
                         ? 'text-[#00D47C] font-semibold'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
                     <span>Tritanopia</span>
-                    {colorblindType === 'tritanopia' && (
+                    {mode === 'colorblind' && colorblindType === 'tritanopia' && (
                       <div className="w-3 h-3 rounded-full bg-[#00D47C]"></div>
                     )}
                   </button>
@@ -176,6 +202,7 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
                 onClick={() => {
                   setMode('high-contrast');
                   setShowAccessibilityOptions(false);
+                  setShowColorblindTypes(false);
                 }}
                 className={`w-full flex items-center justify-between p-2.5 rounded-lg transition-all text-sm ${
                   mode === 'high-contrast'
@@ -222,7 +249,12 @@ export function UserMenuDrawer({ open, onOpenChange, onHelpSupport,}: UserMenuDr
           <MenuItem
   icon={Info}
   label="Help & Support"
-  onClick={onHelpSupport}
+  onClick={() => { onOpenChange(false); onHelpSupport(); }}
+/>
+          <MenuItem
+  icon={Settings}
+  label="Settings"
+  onClick={() => { onOpenChange(false); onSettings?.(); }}
 />
         </div>
 
